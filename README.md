@@ -2,7 +2,7 @@
 
 ## Demo
 
-Go to [**Live Demo**](organize.union.rocks)
+Go to [**Live Demo**](https://organize.union.rocks)
 
 ## Running the project
 
