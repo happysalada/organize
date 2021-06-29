@@ -1,0 +1,5 @@
+build/
+dist/
+node_modules/
+workers-site/
+wrangler.toml
