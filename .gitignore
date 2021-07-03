@@ -7,3 +7,4 @@ frontend/wrangler.toml
 frontend/.direnv/
 
 backend/.direnv
+backend/target

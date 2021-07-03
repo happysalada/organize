@@ -1,3 +1,5 @@
 fn main() {
-    println!("Hello, world!");
+    trillium_smol::run(|conn: trillium::Conn| async move {
+        conn.ok("hello from trillium!")
+    });
 }
