@@ -1,6 +1,6 @@
-build/
-dist/
-node_modules/
-workers-site/
-.svelte-kit/
-wrangler.toml
+frontend/build/
+frontend/dist/
+frontend/node_modules/
+frontend/workers-site/
+frontend/.svelte-kit/
+frontend/wrangler.toml
