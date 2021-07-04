@@ -8,3 +8,4 @@ frontend/.direnv/
 
 backend/.direnv
 backend/target
+backend/db

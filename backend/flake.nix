@@ -17,17 +17,22 @@
       in
       {
         devShell = pkgs.mkShell {
-          buildInputs = [
-            pkgs.openssl
-            pkgs.pkgconfig
-            pkgs.exa
-            pkgs.fd
-            pkgs.rust-bin.stable.latest.default
+          buildInputs = with pkgs; [
+            exa
+            fd
+            rust-bin.stable.latest.default
+            sqlite
+          ] ++ lib.optionals stdenv.isDarwin [
+            libiconv
+            darwin.apple_sdk.frameworks.Security
+            darwin.apple_sdk.frameworks.CoreFoundation
           ];
 
           shellHook = ''
             alias ls=exa
             alias find=fd
+            export RUST_LOG=info
+            export DATABASE_URL=sqlite:db/try.db
           '';
         };
       }
