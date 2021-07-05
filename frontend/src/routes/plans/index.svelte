@@ -99,7 +99,6 @@
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
         <form
-          class=""
           action="/plans.json"
           method="post"
           use:enhance={{
@@ -115,7 +114,7 @@
           }}
         >
           <input
-            class="p-4 text-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:border-transparent w-full"
+            class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
             name="title"
             bind:value={title}
             aria-label="Create plan"

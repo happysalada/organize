@@ -26,7 +26,7 @@
   <div>
     <h4 class="text-lg font-bold">{title}</h4>
     <p class="mt-1">
-      {description}
+      {description ? description : ""}
     </p>
     <div class="my-4">
       {#each labels as { title, color }}
