@@ -14,7 +14,41 @@ import type { Locals } from "$lib/types";
 
 const base = "http://127.0.0.1:8080";
 
-export async function api(request: Request<Locals>, data?: {}) {
+export async function getPlans(
+  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>
+) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: "{plans {id, title, description } }",
+    }),
+  });
+}
+
+export async function createPlan(title) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation create_plan($plan: NewPlan!) {
+        createPlan(plan: $plan) { id, title, description }
+      }`,
+      variables: {
+        plan: {
+          title,
+        },
+      },
+    }),
+  });
+}
+
+export async function api(request: Request<Locals>, data?: { title: String }) {
   // user must have a cookie set
   if (!request.locals.userid) {
     return { status: 401 };
@@ -25,7 +59,16 @@ export async function api(request: Request<Locals>, data?: {}) {
     headers: {
       "content-type": "application/json",
     },
-    body: data && JSON.stringify(data),
+    body: JSON.stringify({
+      query: `mutation create_plan($plan: NewPlan!) {
+        createPlan(plan: $plan) { id, title, description }
+      }`,
+      variables: {
+        plan: {
+          title: data.title,
+        },
+      },
+    }),
   });
 
   // if the request came from a <form> submission, the browser's default

@@ -1,6 +1,7 @@
 <script>
   export let plan;
-  const { title, description, labels } = plan;
+  const { title, description } = plan;
+  const labels = plan.labels || [];
   import Label from "./Label.svelte";
 
 </script>
