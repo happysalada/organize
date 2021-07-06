@@ -27,7 +27,6 @@
 </script>
 
 <script lang="ts">
-  import PlanComponent from "$lib/Plan.svelte";
   import { createPlan } from "./_api";
 
   interface Label {
@@ -64,13 +63,14 @@
     );
   }
 
-  async function handleSubmit() {
-    try {
-      await createPlan(title);
-    } catch (error) {
-      // TODO
-    }
-  }
+  // switch when OPTIONS request returns allow-origin
+  // async function handleSubmit() {
+  //   try {
+  //     await createPlan(title);
+  //   } catch (error) {
+  //     // TODO
+  //   }
+  // }
 
 </script>
 
@@ -124,7 +124,39 @@
 
         {#each filteredPlans as plan (plan.id)}
           <li class="px-4 py-4 sm:px-6">
-            <PlanComponent {plan} />
+            <div class="sm:flex">
+              <div class="mb-4 flex-shrink-0 sm:mb-0 sm:mr-4">
+                <svg
+                  class="h-32 w-full sm:w-32 border border-gray-300 bg-white text-gray-300"
+                  preserveAspectRatio="none"
+                  stroke="currentColor"
+                  fill="none"
+                  viewBox="0 0 200 200"
+                  aria-hidden="true"
+                >
+                  <path
+                    vector-effect="non-scaling-stroke"
+                    stroke-width="1"
+                    d="M0 0l200 200M0 200L200 0"
+                  />
+                </svg>
+              </div>
+              <div>
+                <h4 class="text-lg font-bold">{plan.title}</h4>
+                <p class="mt-1">
+                  {plan.description ? plan.description : ""}
+                </p>
+                <div class="my-4">
+                  {#each plan.labels || [] as { title, color }}
+                    <span
+                      class="inline-flex items-center mx-0.5 px-2.5 py-0.5 rounded-md text-sm font-medium bg-{color}-100 text-{color}-800"
+                    >
+                      {title}
+                    </span>
+                  {/each}
+                </div>
+              </div>
+            </div>
           </li>
         {/each}
 
