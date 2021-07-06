@@ -27,7 +27,7 @@
 </script>
 
 <script lang="ts">
-  import { createPlan } from "./_api";
+  // import { createPlan } from "./_api";
 
   interface Label {
     color: String;
@@ -55,6 +55,8 @@
           stringToSearch = planValue
             .map((label) => Object.values(label).join(" ").toLocaleLowerCase())
             .join(" ");
+        } else if (!planValue) {
+          return false;
         } else {
           stringToSearch = planValue.toLocaleLowerCase();
         }
