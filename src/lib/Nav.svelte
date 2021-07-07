@@ -80,6 +80,11 @@
               class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium"
               aria-current="page">Plans</a
             >
+            <a
+              href="/agents"
+              class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium"
+              aria-current="page">Agents</a
+            >
           </div>
         </div>
       </div>

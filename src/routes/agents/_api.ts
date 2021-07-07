@@ -14,7 +14,7 @@ import type { Locals } from "$lib/types";
 
 const base = "http://127.0.0.1:8080";
 
-export async function getPlans(
+export async function getAgents(
   fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>
 ) {
   return await fetch(`${base}/graphql`, {
@@ -24,31 +24,31 @@ export async function getPlans(
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: "{plans {id, title, description } }",
+      query: "{agents {id, name, email } }",
     }),
   });
 }
 
-export async function createPlan(title) {
+export async function createAgent(name) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: `mutation create_plan($plan: NewPlan!) {
-        createPlan(plan: $plan) { id, title, description }
+      query: `mutation create_agent($agent: NewAgent!) {
+        createAgent(newAgent: $agent) { }
       }`,
       variables: {
-        plan: {
-          title,
+        agent: {
+          name,
         },
       },
     }),
   });
 }
 
-export async function api(request: Request<Locals>, data?: { title: String }) {
+export async function api(request: Request<Locals>, data?: { name: String }) {
   // user must have a cookie set
   if (!request.locals.userid) {
     return { status: 401 };
@@ -60,12 +60,12 @@ export async function api(request: Request<Locals>, data?: { title: String }) {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: `mutation create_plan($plan: NewPlan!) {
-        createPlan(newPlan: $plan) {  }
+      query: `mutation create_agent($agent: NewAgent!) {
+        createAgent(newAgent: $agent) 
       }`,
       variables: {
-        plan: {
-          title: data.title,
+        agent: {
+          name: data.name,
         },
       },
     }),
@@ -83,7 +83,7 @@ export async function api(request: Request<Locals>, data?: { title: String }) {
     return {
       status: 303,
       headers: {
-        location: "/plans",
+        location: "/agents",
       },
     };
   }
