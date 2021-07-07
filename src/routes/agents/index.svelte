@@ -27,6 +27,8 @@
 </script>
 
 <script lang="ts">
+  import Flash from "$lib/Flash.svelte";
+
   interface Agent {
     id: String;
     name: String;
@@ -38,6 +40,7 @@
 
   let name = "";
   let searchQuery = "";
+  let error;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredAgents = agents.filter((agent: Agent) =>
@@ -68,6 +71,8 @@
   <title>Organizing work</title>
 </svelte:head>
 
+<Flash {error} />
+
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
     <div class="my-8">
@@ -94,10 +99,16 @@
           method="post"
           use:enhance={{
             result: async (res, form) => {
-              console.log(await res.json());
-              const {
-                data: { createAgent: created },
-              } = await res.json();
+              const { data, errors } = await res.json();
+              if (errors && errors.length > 0) {
+                error = errors
+                  .map(({ message }) => message.toString())
+                  .join("\n");
+                setTimeout(() => (error = undefined), 10000);
+                console.error(error);
+                return;
+              }
+              const { createAgent: created } = data;
               agents = [created, ...agents];
               filteredAgents = agents;
 
@@ -137,27 +148,27 @@
                       >
                         Email
                       </th>
-                      <th scope="col" class="relative px-6 py-3">
+                      <!-- <th scope="col" class="relative px-6 py-3">
                         <span class="sr-only">Edit</span>
-                      </th>
+                      </th> -->
                     </tr>
                   </thead>
                   <tbody>
                     {#each filteredAgents as agent, index (agent.id)}
-                      {#if index % 2 == 1}
+                      {#if index % 2 == 0}
                         <!-- Odd row -->
                         <tr class="bg-white">
                           <td
                             class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                           >
-                            Jane Cooper
+                            {agent.name}
                           </td>
                           <td
                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
-                            jane.cooper@example.com
+                            {agent.email || ""}
                           </td>
-                          <td
+                          <!-- <td
                             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                           >
                             <a
@@ -165,7 +176,7 @@
                               class="text-indigo-600 hover:text-indigo-900"
                               >Edit</a
                             >
-                          </td>
+                          </td> -->
                         </tr>
                       {:else}
                         <!-- Even row -->
@@ -173,14 +184,14 @@
                           <td
                             class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                           >
-                            Cody Fisher
+                            {agent.name}
                           </td>
                           <td
                             class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
                           >
-                            cody.fisher@example.com
+                            {agent.email || ""}
                           </td>
-                          <td
+                          <!-- <td
                             class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                           >
                             <a
@@ -188,7 +199,7 @@
                               class="text-indigo-600 hover:text-indigo-900"
                               >Edit</a
                             >
-                          </td>
+                          </td> -->
                         </tr>
                       {/if}
                     {/each}

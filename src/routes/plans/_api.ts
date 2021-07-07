@@ -61,7 +61,7 @@ export async function api(request: Request<Locals>, data?: { title: String }) {
     },
     body: JSON.stringify({
       query: `mutation create_plan($plan: NewPlan!) {
-        createPlan(newPlan: $plan) {  }
+        createPlan(newPlan: $plan) { id, title, description }
       }`,
       variables: {
         plan: {

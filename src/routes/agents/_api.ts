@@ -61,7 +61,7 @@ export async function api(request: Request<Locals>, data?: { name: String }) {
     },
     body: JSON.stringify({
       query: `mutation create_agent($agent: NewAgent!) {
-        createAgent(newAgent: $agent) 
+        createAgent(newAgent: $agent) { id, name, email }
       }`,
       variables: {
         agent: {

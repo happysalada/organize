@@ -28,6 +28,7 @@
 
 <script lang="ts">
   // import { createPlan } from "./_api";
+  import Flash from "$lib/Flash.svelte";
 
   interface Label {
     color: String;
@@ -46,6 +47,7 @@
 
   let title = "";
   let searchQuery = "";
+  let error;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>
@@ -80,6 +82,8 @@
   <title>Organizing work</title>
 </svelte:head>
 
+<Flash {error} />
+
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
     <div class="my-8">
@@ -105,9 +109,16 @@
           method="post"
           use:enhance={{
             result: async (res, form) => {
-              const {
-                data: { createPlan: created },
-              } = await res.json();
+              const { data, errors } = await res.json();
+              if (errors && errors.length > 0) {
+                error = errors
+                  .map(({ message }) => message.toString())
+                  .join("\n");
+                setTimeout(() => (error = undefined), 10000);
+                console.error(error);
+                return;
+              }
+              const { createPlan: created } = data;
               plans = [created, ...plans];
               filteredPlans = plans;
 
