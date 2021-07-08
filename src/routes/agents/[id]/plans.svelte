@@ -47,6 +47,7 @@
     id: String;
     title: String;
     description: String;
+    imageId: String | undefined;
     labels: Array<Label>;
   }
 
@@ -140,20 +141,22 @@
           <li class="px-4 py-4 sm:px-6">
             <div class="sm:flex">
               <div class="mb-4 flex-shrink-0 sm:mb-0 sm:mr-4">
-                <svg
-                  class="h-32 w-full sm:w-32 border border-gray-300 bg-white text-gray-300"
-                  preserveAspectRatio="none"
-                  stroke="currentColor"
-                  fill="none"
-                  viewBox="0 0 200 200"
-                  aria-hidden="true"
-                >
-                  <path
-                    vector-effect="non-scaling-stroke"
-                    stroke-width="1"
-                    d="M0 0l200 200M0 200L200 0"
-                  />
-                </svg>
+                {#if plan.imageId}
+                  <svg
+                    class="h-32 w-full sm:w-32 border border-gray-300 bg-white text-gray-300"
+                    preserveAspectRatio="none"
+                    stroke="currentColor"
+                    fill="none"
+                    viewBox="0 0 200 200"
+                    aria-hidden="true"
+                  >
+                    <path
+                      vector-effect="non-scaling-stroke"
+                      stroke-width="1"
+                      d="M0 0l200 200M0 200L200 0"
+                    />
+                  </svg>
+                {/if}
               </div>
               <div>
                 <h4 class="text-lg font-bold">{plan.title}</h4>
