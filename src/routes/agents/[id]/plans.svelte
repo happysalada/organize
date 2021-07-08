@@ -1,33 +1,41 @@
 <script context="module" lang="ts">
   import { getPlans } from "./_api";
-  import { enhance } from "$lib/form";
   import type { Load } from "@sveltejs/kit";
 
   // see https://kit.svelte.dev/docs#loading
-  export const load: Load = async ({ fetch }) => {
-    const res = await getPlans(fetch);
+  export const load: Load = async ({ page, fetch }) => {
+    const agentId = page.params.id;
+    const res = await getPlans(fetch, agentId);
 
     if (res.ok) {
-      const {
-        data: { plans },
-      } = await res.json();
+      const { data, errors } = await res.json();
+      if (errors && errors.length > 0) {
+        const errorMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        console.error(errorMessage);
+        return {
+          props: { plans: [], errorMessage, agentId },
+        };
+      }
+      const { plans } = data;
 
       return {
-        props: { plans },
+        props: { plans, errorMessage: undefined, agentId },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { errorMessage: message },
+      props: { errorMessage: message, agentId },
     };
   };
 
 </script>
 
 <script lang="ts">
-  // import { createPlan } from "./_api";
+  import { createPlan } from "./_api";
   import Flash from "$lib/Flash.svelte";
 
   interface Label {
@@ -47,7 +55,8 @@
 
   let title = "";
   let searchQuery = "";
-  let errorMessage: String | undefined;
+  export let errorMessage: String | undefined;
+  export let agentId: String;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>
@@ -67,14 +76,27 @@
     );
   }
 
-  // switch when OPTIONS request returns allow-origin
-  // async function handleSubmit() {
-  //   try {
-  //     await createPlan(title);
-  //   } catch (error) {
-  //     // TODO
-  //   }
-  // }
+  async function handleSubmit() {
+    try {
+      const response = await createPlan(title, agentId);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        errorMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        setTimeout(() => (errorMessage = undefined), 10000);
+        console.error(errorMessage);
+        return;
+      }
+
+      const { createPlan: created } = data;
+      plans = [created, ...plans];
+      filteredPlans = plans;
+      title = "";
+    } catch (error) {
+      errorMessage = error.toString();
+    }
+  }
 
 </script>
 
@@ -104,28 +126,7 @@
     </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
-        <form
-          action="/plans.json"
-          method="post"
-          use:enhance={{
-            result: async (res, form) => {
-              const { data, errors } = await res.json();
-              if (errors && errors.length > 0) {
-                errorMessage = errors
-                  .map(({ message }) => message.toString())
-                  .join("\n");
-                setTimeout(() => (errorMessage = undefined), 10000);
-                console.error(errorMessage);
-                return;
-              }
-              const { createPlan: created } = data;
-              plans = [created, ...plans];
-              filteredPlans = plans;
-
-              form.reset();
-            },
-          }}
-        >
+        <form on:submit|preventDefault={handleSubmit}>
           <input
             class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
             name="title"

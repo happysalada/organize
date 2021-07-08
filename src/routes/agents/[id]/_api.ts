@@ -15,7 +15,8 @@ import type { Locals } from "$lib/types";
 const base = "http://127.0.0.1:8080";
 
 export async function getPlans(
-  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>
+  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
+  agentId: String
 ) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
@@ -24,24 +25,25 @@ export async function getPlans(
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: "{plans {id, title, description } }",
+      query: `{plans(agentId: "${agentId}") {id, title, description } }`,
     }),
   });
 }
 
-export async function createPlan(title) {
+export async function createPlan(title: String, agentId: String) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: `mutation create_plan($plan: NewPlan!) {
-        createPlan(plan: $plan) { id, title, description }
+      query: `mutation create_plan($newPlan: NewPlan!) {
+        createPlan(newPlan: $newPlan) { id, title, description }
       }`,
       variables: {
-        plan: {
+        newPlan: {
           title,
+          agentId,
         },
       },
     }),
