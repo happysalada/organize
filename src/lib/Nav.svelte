@@ -1,3 +1,8 @@
+<script lang="ts">
+  export let path: String;
+
+</script>
+
 <!-- This example requires Tailwind CSS v2.0+ -->
 <nav class="bg-gray-800">
   <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">

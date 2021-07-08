@@ -1,6 +1,5 @@
 <script context="module" lang="ts">
   import { getAgents } from "./_api";
-  import { enhance } from "$lib/form";
   import type { Load } from "@sveltejs/kit";
 
   // see https://kit.svelte.dev/docs#loading
@@ -8,19 +7,27 @@
     const res = await getAgents(fetch);
 
     if (res.ok) {
-      const {
-        data: { agents },
-      } = await res.json();
+      const { data, errors } = await res.json();
+      if (errors && errors.length > 0) {
+        const errorMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        console.error(errorMessage);
+        return {
+          props: { agents: [], errorMessage },
+        };
+      }
+      const { agents } = data;
 
       return {
-        props: { agents },
+        props: { agents, errorMessage: undefined },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      error: new Error(message),
+      props: { errorMessage: message },
     };
   };
 
@@ -28,10 +35,12 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
+  import { createAgent } from "./_api";
 
   interface Agent {
     id: String;
     name: String;
+    uniqueName: String;
     email: String;
   }
 
@@ -40,7 +49,7 @@
 
   let name = "";
   let searchQuery = "";
-  let error;
+  export let errorMessage: String | undefined;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredAgents = agents.filter((agent: Agent) =>
@@ -56,14 +65,27 @@
     );
   }
 
-  // switch when OPTIONS request returns allow-origin
-  // async function handleSubmit() {
-  //   try {
-  //     await createPlan(title);
-  //   } catch (error) {
-  //     // TODO
-  //   }
-  // }
+  async function handleSubmit() {
+    try {
+      const response = await createAgent(name);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        errorMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        setTimeout(() => (errorMessage = undefined), 10000);
+        console.error(errorMessage);
+        return;
+      }
+
+      const { createAgent: created } = data;
+      agents = [created, ...agents];
+      filteredAgents = agents;
+      name = "";
+    } catch (error) {
+      errorMessage = error.toString();
+    }
+  }
 
 </script>
 
@@ -71,7 +93,7 @@
   <title>Organizing work</title>
 </svelte:head>
 
-<Flash {error} />
+<Flash {errorMessage} />
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
@@ -93,29 +115,7 @@
     </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
-        <form
-          class="mb-1"
-          action="/agents.json"
-          method="post"
-          use:enhance={{
-            result: async (res, form) => {
-              const { data, errors } = await res.json();
-              if (errors && errors.length > 0) {
-                error = errors
-                  .map(({ message }) => message.toString())
-                  .join("\n");
-                setTimeout(() => (error = undefined), 10000);
-                console.error(error);
-                return;
-              }
-              const { createAgent: created } = data;
-              agents = [created, ...agents];
-              filteredAgents = agents;
-
-              form.reset();
-            },
-          }}
-        >
+        <form class="mb-1" on:submit|preventDefault={handleSubmit}>
           <input
             class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
             name="name"
@@ -148,60 +148,34 @@
                       >
                         Email
                       </th>
-                      <!-- <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Edit</span>
-                      </th> -->
+                      <th scope="col" class="relative px-6 py-3">
+                        <span class="sr-only">Actions</span>
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {#each filteredAgents as agent, index (agent.id)}
-                      {#if index % 2 == 0}
-                        <!-- Odd row -->
-                        <tr class="bg-white">
-                          <td
-                            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                      <tr class={index % 2 == 0 ? "bg-white" : "bg-gray-50"}>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
+                        >
+                          {agent.name}
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
+                        >
+                          {agent.email || ""}
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                        >
+                          <a
+                            href="{agent.uniqueName}/plans"
+                            class="text-indigo-600 hover:text-indigo-900"
+                            >Plans</a
                           >
-                            {agent.name}
-                          </td>
-                          <td
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                          >
-                            {agent.email || ""}
-                          </td>
-                          <!-- <td
-                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                          >
-                            <a
-                              href="#"
-                              class="text-indigo-600 hover:text-indigo-900"
-                              >Edit</a
-                            >
-                          </td> -->
-                        </tr>
-                      {:else}
-                        <!-- Even row -->
-                        <tr class="bg-gray-50">
-                          <td
-                            class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
-                          >
-                            {agent.name}
-                          </td>
-                          <td
-                            class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                          >
-                            {agent.email || ""}
-                          </td>
-                          <!-- <td
-                            class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                          >
-                            <a
-                              href="#"
-                              class="text-indigo-600 hover:text-indigo-900"
-                              >Edit</a
-                            >
-                          </td> -->
-                        </tr>
-                      {/if}
+                        </td>
+                      </tr>
                     {/each}
 
                     <!-- More people... -->

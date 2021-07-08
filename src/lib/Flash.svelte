@@ -1,16 +1,16 @@
 <script lang="ts">
-  export let error: String | undefined;
+  export let errorMessage: String | undefined;
 
 </script>
 
-{#if error}
+{#if errorMessage}
   <div class="relative bg-indigo-600">
     <div class="max-w-7xl mx-auto py-3 px-3 sm:px-6 lg:px-8">
       <div class="pr-16 sm:text-center sm:px-16">
         <p class="font-medium text-white">
-          <span class="md:hidden">{error}</span>
+          <span class="md:hidden">{errorMessage}</span>
           <span class="hidden md:inline">
-            {error}
+            {errorMessage}
           </span>
           <!-- <span class="block sm:ml-2 sm:inline-block">
             <a href="#" class="text-white font-bold underline">
@@ -25,7 +25,7 @@
         <button
           type="button"
           class="flex p-2 rounded-md hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-white"
-          on:click={() => (error = undefined)}
+          on:click={() => (errorMessage = undefined)}
         >
           <span class="sr-only">Dismiss</span>
           <!-- Heroicon name: outline/x -->

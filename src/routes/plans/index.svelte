@@ -20,7 +20,7 @@
     const { message } = await res.json();
 
     return {
-      error: new Error(message),
+      props: { errorMessage: message },
     };
   };
 
@@ -47,12 +47,12 @@
 
   let title = "";
   let searchQuery = "";
-  let error;
+  let errorMessage: String | undefined;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>
       Object.values(plan).some((planValue: Array<Label> | String) => {
-        let stringToSearch;
+        let stringToSearch: String;
         if (Array.isArray(planValue)) {
           stringToSearch = planValue
             .map((label) => Object.values(label).join(" ").toLocaleLowerCase())
@@ -82,7 +82,7 @@
   <title>Organizing work</title>
 </svelte:head>
 
-<Flash {error} />
+<Flash {errorMessage} />
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
@@ -111,11 +111,11 @@
             result: async (res, form) => {
               const { data, errors } = await res.json();
               if (errors && errors.length > 0) {
-                error = errors
+                errorMessage = errors
                   .map(({ message }) => message.toString())
                   .join("\n");
-                setTimeout(() => (error = undefined), 10000);
-                console.error(error);
+                setTimeout(() => (errorMessage = undefined), 10000);
+                console.error(errorMessage);
                 return;
               }
               const { createPlan: created } = data;
