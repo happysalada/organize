@@ -34,6 +34,23 @@ export async function createAgent(name: String) {
   });
 }
 
+export async function deleteAgent(uniqueName: String) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation delete_agent($uniqueName: String!) {
+        deleteAgent(uniqueName: $uniqueName)
+      }`,
+      variables: {
+        uniqueName,
+      },
+    }),
+  });
+}
+
 export async function getPlans(
   fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
   agentId: String

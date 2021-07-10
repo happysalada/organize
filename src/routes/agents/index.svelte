@@ -35,7 +35,7 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
-  import { createAgent } from "$lib/api";
+  import { createAgent, deleteAgent } from "$lib/api";
 
   interface Agent {
     id: String;
@@ -82,6 +82,28 @@
       agents = [created, ...agents];
       filteredAgents = agents;
       name = "";
+    } catch (error) {
+      errorMessage = error.toString();
+    }
+  }
+
+  async function handleDelete(uniqueName: String) {
+    try {
+      const response = await deleteAgent(uniqueName);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        errorMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        setTimeout(() => (errorMessage = undefined), 10000);
+        console.error(errorMessage);
+        return;
+      } else if (data.deleteAgent == 0) {
+        return;
+      }
+
+      agents = agents.filter((agent) => agent.uniqueName != uniqueName);
+      filteredAgents = agents;
     } catch (error) {
       errorMessage = error.toString();
     }
@@ -149,7 +171,10 @@
                         Email
                       </th>
                       <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Actions</span>
+                        <span class="sr-only">Plans</span>
+                      </th>
+                      <th scope="col" class="relative px-6 py-3">
+                        <span class="sr-only">Delete</span>
                       </th>
                     </tr>
                   </thead>
@@ -174,6 +199,17 @@
                             class="text-indigo-600 hover:text-indigo-900"
                             >Plans</a
                           >
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
+                        >
+                          <button
+                            on:click={() => handleDelete(agent.uniqueName)}
+                            type="button"
+                            class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          >
+                            Delete
+                          </button>
                         </td>
                       </tr>
                     {/each}
