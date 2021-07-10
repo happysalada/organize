@@ -5,3 +5,4 @@ workers-site/
 .svelte-kit/
 wrangler.toml
 .direnv/
+.env.*

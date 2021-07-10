@@ -1,4 +1,5 @@
-const base = "http://127.0.0.1:8080";
+import { variables } from "$lib/env";
+const base = variables.apiUrl;
 
 export async function getAgents(
   fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>
