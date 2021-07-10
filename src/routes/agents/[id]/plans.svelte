@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { getPlans } from "./_api";
+  import { getPlans } from "$lib/api";
   import type { Load } from "@sveltejs/kit";
 
   // see https://kit.svelte.dev/docs#loading
@@ -15,27 +15,26 @@
           .join("\n");
         console.error(errorMessage);
         return {
-          props: { plans: [], errorMessage, agentId },
+          props: { plans: [], errorMessage },
         };
       }
       const { plans } = data;
 
       return {
-        props: { plans, errorMessage: undefined, agentId },
+        props: { plans, errorMessage: undefined },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { errorMessage: message, agentId },
+      props: { errorMessage: message },
     };
   };
 
 </script>
 
 <script lang="ts">
-  import { createPlan } from "./_api";
   import Flash from "$lib/Flash.svelte";
 
   interface Label {
@@ -54,10 +53,8 @@
   export let plans: Plan[];
   let filteredPlans: Plan[] = plans;
 
-  let title = "";
   let searchQuery = "";
   export let errorMessage: String | undefined;
-  export let agentId: String;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>
@@ -77,28 +74,6 @@
     );
   }
 
-  async function handleSubmit() {
-    try {
-      const response = await createPlan(title, agentId);
-      const { data, errors } = await response.json();
-      if (errors && errors.length > 0) {
-        errorMessage = errors
-          .map(({ message }) => message.toString())
-          .join("\n");
-        setTimeout(() => (errorMessage = undefined), 10000);
-        console.error(errorMessage);
-        return;
-      }
-
-      const { createPlan: created } = data;
-      plans = [created, ...plans];
-      filteredPlans = plans;
-      title = "";
-    } catch (error) {
-      errorMessage = error.toString();
-    }
-  }
-
 </script>
 
 <svelte:head>
@@ -109,6 +84,14 @@
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
+    <div class="w-full grid justify-items-center">
+      <button
+        type="button"
+        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      >
+        Create plan
+      </button>
+    </div>
     <div class="my-8">
       <label for="email" class="block text-sm font-medium text-gray-700"
         >Search</label
@@ -127,16 +110,6 @@
     </div>
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
-        <form on:submit|preventDefault={handleSubmit}>
-          <input
-            class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
-            name="title"
-            bind:value={title}
-            aria-label="Create plan"
-            placeholder="+ tap to create a new plan"
-          />
-        </form>
-
         {#each filteredPlans as plan (plan.id)}
           <li class="px-4 py-4 sm:px-6">
             <div class="sm:flex">

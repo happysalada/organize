@@ -1,5 +1,5 @@
 <script context="module" lang="ts">
-  import { getAgents } from "./_api";
+  import { getAgents } from "$lib/api";
   import type { Load } from "@sveltejs/kit";
 
   // see https://kit.svelte.dev/docs#loading
@@ -35,7 +35,7 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
-  import { createAgent } from "./_api";
+  import { createAgent } from "$lib/api";
 
   interface Agent {
     id: String;
