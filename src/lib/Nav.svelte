@@ -82,7 +82,9 @@
             <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
             <a
               href="/agents"
-              class="bg-gray-900 text-white px-3 py-2 rounded-md text-sm font-medium"
+              class="{path === '/agents'
+                ? 'nav-active'
+                : 'nav-inactive'} nav-default"
               aria-current="page">Agents</a
             >
           </div>
@@ -103,3 +105,18 @@
     </div>
   </div>
 </nav>
+
+<style>
+  .nav-default {
+    @apply px-3 py-2 rounded-md text-sm font-medium;
+  }
+
+  .nav-active {
+    @apply bg-gray-900 text-white;
+  }
+
+  .nav-inactive {
+    @apply text-gray-300 hover:bg-gray-700 hover:text-white block;
+  }
+
+</style>
