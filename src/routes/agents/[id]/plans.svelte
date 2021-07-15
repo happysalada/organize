@@ -1,9 +1,8 @@
 <script context="module" lang="ts">
   import { getPlans } from "$lib/api";
-  import type { Load } from "@sveltejs/kit";
 
   // see https://kit.svelte.dev/docs#loading
-  export const load: Load = async ({ page, fetch }) => {
+  export async function load({ page, fetch }) {
     const agentId = page.params.id;
     const res = await getPlans(fetch, agentId);
 
@@ -30,7 +29,7 @@
     return {
       props: { errorMessage: message, agentId },
     };
-  };
+  }
 
 </script>
 

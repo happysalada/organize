@@ -1,10 +1,9 @@
 <script context="module" lang="ts">
   import { getLabels, getAgents } from "$lib/api";
-  import type { Load } from "@sveltejs/kit";
   import type { Agent, Label } from "$lib/types";
 
   // see https://kit.svelte.dev/docs#loading
-  export const load: Load = async ({ page, fetch }) => {
+  export async function load({ page, fetch }) {
     const agentId = page.params.id;
     let errorMessage: string | undefined;
     let labels: Label[] = [];
@@ -46,7 +45,7 @@
     return {
       props: { labels, agents, errorMessage, agentId },
     };
-  };
+  }
 
 </script>
 
@@ -400,12 +399,6 @@
                 </div>
 
                 <div class="px-4 py-5 sm:px-6 bg-gray-100">
-                  <button
-                    type="button"
-                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Add start date
-                  </button>
                   <button
                     type="button"
                     class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
