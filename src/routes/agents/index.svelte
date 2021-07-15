@@ -5,7 +5,6 @@
   export async function load({ fetch }) {
     const res = await getAgents(fetch);
 
-    console.log(res);
     if (res.ok) {
       const { data, errors } = await res.json();
       if (errors && errors.length > 0) {
