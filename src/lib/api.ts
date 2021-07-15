@@ -1,3 +1,4 @@
+import type { NewProcess } from "$lib/types";
 import { variables } from "$lib/env";
 const base = variables.apiUrl;
 
@@ -83,6 +84,39 @@ export async function createPlan(title: String, agentId: String) {
           title,
           agentId,
         },
+      },
+    }),
+  });
+}
+
+export async function getLabels(
+  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
+  agentId: String
+) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `{labels(agentId: "${agentId}") {id, name, color } }`,
+    }),
+  });
+}
+
+export async function createProcess(newProcess: NewProcess) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation create_process($newProcess: NewProcess!) {
+        createProcess(newProcess: $newProcess) { id, title, description }
+      }`,
+      variables: {
+        newProcess,
       },
     }),
   });
