@@ -15,20 +15,20 @@
           .join("\n");
         console.error(errorMessage);
         return {
-          props: { plans: [], errorMessage },
+          props: { plans: [], errorMessage, agentId },
         };
       }
       const { plans } = data;
 
       return {
-        props: { plans, errorMessage: undefined },
+        props: { plans, errorMessage: undefined, agentId },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { errorMessage: message },
+      props: { errorMessage: message, agentId },
     };
   };
 
@@ -36,35 +36,20 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
-
-  interface Label {
-    color: String;
-    title: String;
-  }
-
-  interface Plan {
-    id: String;
-    title: String;
-    description: String;
-    imageId: String | undefined;
-    labels: Array<Label>;
-  }
+  import type { Plan } from "$lib/types";
 
   export let plans: Plan[];
+  export let agentId: string;
   let filteredPlans: Plan[] = plans;
 
   let searchQuery = "";
-  export let errorMessage: String | undefined;
+  export let errorMessage: string | undefined;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>
-      Object.values(plan).some((planValue: Array<Label> | String) => {
-        let stringToSearch: String;
-        if (Array.isArray(planValue)) {
-          stringToSearch = planValue
-            .map((label) => Object.values(label).join(" ").toLocaleLowerCase())
-            .join(" ");
-        } else if (!planValue) {
+      Object.values(plan).some((planValue: string) => {
+        let stringToSearch: string;
+        if (!planValue) {
           return false;
         } else {
           stringToSearch = planValue.toLocaleLowerCase();
@@ -85,12 +70,14 @@
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
     <div class="w-full grid justify-items-center">
-      <button
-        type="button"
-        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-      >
-        Create plan
-      </button>
+      <a href="/agents/{agentId}/new_plan">
+        <button
+          type="button"
+          class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+        >
+          Create plan
+        </button>
+      </a>
     </div>
     <div class="my-8">
       <label for="email" class="block text-sm font-medium text-gray-700"
@@ -136,15 +123,6 @@
                 <p class="mt-1">
                   {plan.description ? plan.description : ""}
                 </p>
-                <div class="my-4">
-                  {#each plan.labels || [] as { title, color }}
-                    <span
-                      class="inline-flex items-center mx-0.5 px-2.5 py-0.5 rounded-md text-sm font-medium bg-{color}-100 text-{color}-800"
-                    >
-                      {title}
-                    </span>
-                  {/each}
-                </div>
               </div>
             </div>
           </li>

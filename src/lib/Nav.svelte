@@ -1,5 +1,5 @@
 <script lang="ts">
-  export let path: String;
+  export let path: string;
 
 </script>
 
