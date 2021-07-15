@@ -1,11 +1,11 @@
 <script context="module" lang="ts">
   import { getAgents } from "$lib/api";
-  import type { Load } from "@sveltejs/kit";
 
   // see https://kit.svelte.dev/docs#loading
-  export const load: Load = async ({ fetch }) => {
+  export async function load({ fetch }) {
     const res = await getAgents(fetch);
 
+    console.log(res);
     if (res.ok) {
       const { data, errors } = await res.json();
       if (errors && errors.length > 0) {
@@ -29,20 +29,14 @@
     return {
       props: { errorMessage: message },
     };
-  };
+  }
 
 </script>
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import { createAgent, deleteAgent } from "$lib/api";
-
-  interface Agent {
-    id: String;
-    name: String;
-    uniqueName: String;
-    email: String;
-  }
+  import type { Agent } from "$lib/types";
 
   export let agents: Agent[];
   let filteredAgents: Agent[] = agents;
