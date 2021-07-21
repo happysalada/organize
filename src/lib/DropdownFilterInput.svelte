@@ -27,13 +27,9 @@
   function handleSelection(event) {
     console.log(event.currentTarget);
   }
-
 </script>
 
-<div
-  class="px-4 py-5 sm:px-6 bg-gray-100"
-  on:click_outside={() => (dropdownOpen = false)}
->
+<div class="px-4 py-5 sm:px-6 bg-gray-100">
   <label for="processAgents" class="block text-sm font-medium text-gray-700">
     {label}
   </label>

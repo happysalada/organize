@@ -19,6 +19,19 @@ export interface Agent {
   email: string;
 }
 
+export interface Label {
+  name: string;
+  uniqueName: string;
+  color: string;
+  agentId: string;
+}
+
+export interface NewLabel {
+  name: string;
+  color: string;
+  agentId: string;
+}
+
 export interface Process {
   id: string;
   title: string;
@@ -35,11 +48,6 @@ export interface NewProcess {
   dueDate: Date | undefined;
   startDate: Date | undefined;
   agentId: string;
-}
-
-export interface Label {
-  color: string;
-  title: string;
 }
 
 export interface Plan {

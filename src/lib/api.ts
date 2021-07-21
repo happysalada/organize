@@ -1,4 +1,4 @@
-import type { NewProcess } from "$lib/types";
+import type { NewProcess, NewLabel } from "$lib/types";
 import { variables } from "$lib/env";
 const base = variables.apiUrl;
 
@@ -100,7 +100,45 @@ export async function getLabels(
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: `{labels(agentId: "${agentId}") {id, name, color } }`,
+      query: `{labels(agentId: "${agentId}") {id, name, color, uniqueName } }`,
+    }),
+  });
+}
+
+export async function createLabel({ name, color, agentId }: NewLabel) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation create_label($newLabel: NewLabel!) {
+        createLabel(newLabel: $newLabel) { name, uniqueName, color }
+      }`,
+      variables: {
+        newLabel: {
+          name,
+          color,
+          agentId,
+        },
+      },
+    }),
+  });
+}
+
+export async function deleteLabel(uniqueName: String) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation delete_label($uniqueName: String!) {
+        deleteLabel(uniqueName: $uniqueName)
+      }`,
+      variables: {
+        uniqueName,
+      },
     }),
   });
 }

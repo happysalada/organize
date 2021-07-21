@@ -1,9 +1,10 @@
 <script context="module" lang="ts">
-  import { getAgents } from "$lib/api";
+  import { getLabels } from "$lib/api";
 
   // see https://kit.svelte.dev/docs#loading
-  export async function load({ fetch }) {
-    const res = await getAgents(fetch);
+  export async function load({ page, fetch }) {
+    const agentId = page.params.id;
+    const res = await getLabels(fetch, agentId);
 
     if (res.ok) {
       const { data, errors } = await res.json();
@@ -13,44 +14,48 @@
           .join("\n");
         console.error(errorMessage);
         return {
-          props: { agents: [], errorMessage },
+          props: { labels: [], agentId, errorMessage },
         };
       }
-      const { agents } = data;
+      const { labels } = data;
 
       return {
-        props: { agents, errorMessage: undefined },
+        props: { labels, agentId, errorMessage: undefined },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { errorMessage: message },
+      props: { agentId, errorMessage: message },
     };
   }
 </script>
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
-  import { createAgent, deleteAgent } from "$lib/api";
-  import type { Agent } from "$lib/types";
+  import { createLabel, deleteLabel } from "$lib/api";
+  import type { Label } from "$lib/types";
+  import clickOutside from "$lib/clickOutside";
 
-  export let agents: Agent[];
-  let filteredAgents: Agent[] = agents;
+  export let labels: Label[];
+  export let agentId: string;
+  let filteredLabels: Label[] = labels;
 
   let name = "";
+  let color = "";
   let searchQuery = "";
+  let dropdownOpen = false;
   export let errorMessage: String | undefined;
 
   function search({ currentTarget: { value: searchValue } }) {
-    filteredAgents = agents.filter((agent: Agent) =>
-      Object.values(agent).some((agentValue: String | undefined) => {
+    filteredLabels = labels.filter((label: Label) =>
+      Object.values(label).some((labelValue: String | undefined) => {
         let stringToSearch: String;
-        if (!agentValue) {
+        if (!labelValue) {
           return false;
         } else {
-          stringToSearch = agentValue.toLocaleLowerCase();
+          stringToSearch = labelValue.toLocaleLowerCase();
         }
         return stringToSearch.includes(searchValue);
       })
@@ -59,7 +64,7 @@
 
   async function handleSubmit() {
     try {
-      const response = await createAgent(name);
+      const response = await createLabel({ name, color, agentId });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         errorMessage = errors
@@ -70,9 +75,9 @@
         return;
       }
 
-      const { createAgent: created } = data;
-      agents = [created, ...agents];
-      filteredAgents = agents;
+      const { createLabel: created } = data;
+      labels = [created, ...labels];
+      filteredLabels = labels;
       name = "";
     } catch (error) {
       errorMessage = error.toString();
@@ -81,7 +86,7 @@
 
   async function handleDelete(uniqueName: String) {
     try {
-      const response = await deleteAgent(uniqueName);
+      const response = await deleteLabel(uniqueName);
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         errorMessage = errors
@@ -90,12 +95,12 @@
         setTimeout(() => (errorMessage = undefined), 10000);
         console.error(errorMessage);
         return;
-      } else if (data.deleteAgent == 0) {
+      } else if (data.deleteLabel == 0) {
         return;
       }
 
-      agents = agents.filter((agent) => agent.uniqueName != uniqueName);
-      filteredAgents = agents;
+      labels = labels.filter((label) => label.uniqueName != uniqueName);
+      filteredLabels = labels;
     } catch (error) {
       errorMessage = error.toString();
     }
@@ -126,17 +131,67 @@
         />
       </div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <div class="bg-white shadow sm:rounded-md">
       <ul class="divide-y divide-gray-200">
-        <form class="mb-1" on:submit|preventDefault={handleSubmit}>
-          <input
-            class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
-            name="name"
-            bind:value={name}
-            aria-label="Create Agent"
-            placeholder="+ tap to create a new agent"
-          />
-        </form>
+        <div class="flex h-full space-x-0.5">
+          <div
+            class="w-1/3 flex items-center justify-center bg-{color ||
+              'gray'}-500 relative"
+            use:clickOutside
+            on:click_outside={() => (dropdownOpen = false)}
+          >
+            <button
+              on:click|preventDefault={() => (dropdownOpen = !dropdownOpen)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-10 w-10"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+                />
+              </svg>
+            </button>
+            {#if dropdownOpen}
+              <ul
+                class="absolute w-full -bottom-16 h-full overflow-visible z-10 mt-1  bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                tabindex="-1"
+                role="listbox"
+                aria-labelledby="listbox-label"
+                aria-activedescendant="listbox-option-3"
+              >
+                {#each ["blue", "red", "green", "purple"] as availableColor}
+                  <li
+                    class="bg-{availableColor}-500 cursor-pointer select-none relative py-2 pl-3 pr-9 h-12"
+                    id="listbox-option-0"
+                    role="option"
+                    on:click={() => {
+                      color = availableColor;
+                      dropdownOpen = false;
+                    }}
+                  />
+                {/each}
+
+                <!-- More items... -->
+              </ul>
+            {/if}
+          </div>
+          <form class="mb-1 w-2/3" on:submit|preventDefault={handleSubmit}>
+            <input
+              class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
+              name="name"
+              bind:value={name}
+              aria-label="Create Label"
+              placeholder="+ tap to create a new label"
+            />
+          </form>
+        </div>
 
         <div class="flex flex-col">
           <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
@@ -159,13 +214,7 @@
                         scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Email
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Plans</span>
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Labels</span>
+                        Color
                       </th>
                       <th scope="col" class="relative px-6 py-3">
                         <span class="sr-only">Delete</span>
@@ -173,41 +222,22 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {#each filteredAgents as agent, index (agent.id)}
+                    {#each filteredLabels as label, index (label.uniqueName)}
                       <tr class={index % 2 == 0 ? "bg-white" : "bg-gray-50"}>
                         <td
                           class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                         >
-                          {agent.name}
+                          {label.name}
                         </td>
                         <td
-                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                        >
-                          {agent.email || ""}
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                        >
-                          <a
-                            href="agents/{agent.uniqueName}/plans"
-                            class="text-indigo-600 hover:text-indigo-900"
-                            >Plans</a
-                          >
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                        >
-                          <a
-                            href="agents/{agent.uniqueName}/labels"
-                            class="text-indigo-600 hover:text-indigo-900"
-                            >Labels</a
-                          >
-                        </td>
+                          class="px-6 py-4 whitespace-nowrap text-sm bg-{label.color ||
+                            'gray'}-500"
+                        />
                         <td
                           class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                         >
                           <button
-                            on:click={() => handleDelete(agent.uniqueName)}
+                            on:click={() => handleDelete(label.uniqueName)}
                             type="button"
                             class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           >
