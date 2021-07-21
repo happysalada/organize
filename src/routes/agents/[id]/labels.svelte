@@ -136,28 +136,25 @@
         <div class="flex h-full space-x-0.5">
           <div
             class="w-1/3 flex items-center justify-center bg-{color ||
-              'gray'}-500 relative"
+              'gray'}-500 relative cursor-pointer"
             use:clickOutside
             on:click_outside={() => (dropdownOpen = false)}
+            on:click|preventDefault={() => (dropdownOpen = !dropdownOpen)}
           >
-            <button
-              on:click|preventDefault={() => (dropdownOpen = !dropdownOpen)}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="h-10 w-10"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-                />
-              </svg>
-            </button>
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+              />
+            </svg>
             {#if dropdownOpen}
               <ul
                 class="absolute w-full -bottom-16 h-full overflow-visible z-10 mt-1  bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
@@ -173,7 +170,6 @@
                     role="option"
                     on:click={() => {
                       color = availableColor;
-                      dropdownOpen = false;
                     }}
                   />
                 {/each}
