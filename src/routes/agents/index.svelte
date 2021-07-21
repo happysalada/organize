@@ -59,7 +59,9 @@
 
   async function handleSubmit() {
     try {
-      const response = await createAgent(name);
+      const promise = createAgent(name);
+      name = "";
+      const response = await promise;
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         errorMessage = errors
@@ -73,7 +75,6 @@
       const { createAgent: created } = data;
       agents = [created, ...agents];
       filteredAgents = agents;
-      name = "";
     } catch (error) {
       errorMessage = error.toString();
     }
