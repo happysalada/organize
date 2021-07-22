@@ -180,7 +180,7 @@
           </div>
           <form class="mb-1 w-2/3" on:submit|preventDefault={handleSubmit}>
             <input
-              class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
+              class="p-4 text-lg focus:outline-none w-full border-b-4 border-indigo-500 border-opacity-0 focus:border-opacity-100"
               name="name"
               bind:value={name}
               aria-label="Create Label"
