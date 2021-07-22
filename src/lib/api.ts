@@ -1,4 +1,4 @@
-import type { NewProcess, NewLabel, NewPlan } from "$lib/types";
+import type { NewProcess, NewLabel, NewPlan, UpdatePlan } from "$lib/types";
 import { variables } from "$lib/env";
 const base = variables.apiUrl;
 
@@ -99,6 +99,27 @@ export async function createPlan({ title, agentId }: NewPlan) {
         newPlan: {
           title,
           agentId,
+        },
+      },
+    }),
+  });
+}
+
+export async function updatePlan({ id, title, description }: UpdatePlan) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation update_plan($updatePlan: UpdatePlan!) {
+        updatePlan(updatePlan: $updatePlan)
+      }`,
+      variables: {
+        updatePlan: {
+          id,
+          title,
+          description,
         },
       },
     }),

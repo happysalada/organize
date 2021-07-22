@@ -1,12 +1,13 @@
 <script context="module" lang="ts">
-  import { getLabels, getAgents, getPlan } from "$lib/api";
-  import type { Agent, Label, Plan } from "$lib/types";
+  import { getLabels, getAgents, getPlan, updatePlan } from "$lib/api";
+  import type { Agent, Label, Plan, FlashType } from "$lib/types";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
     const agentId = page.params.agentId;
     const planId = page.params.planId;
-    let errorMessage: string | undefined;
+    let flashMessage: string | undefined;
+    let flashType: FlashType;
     let labels: Label[] = [];
     let agents: Agent[] = [];
     let plan: Plan;
@@ -15,16 +16,17 @@
     if (labelResponse.ok) {
       const { data, errors } = await labelResponse.json();
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
       } else {
         labels = data.labels;
       }
     } else {
       const { message } = await labelResponse.json();
-      errorMessage = message;
+      flashMessage = message;
     }
 
     const agentResponse = await getAgents(fetch);
@@ -32,38 +34,39 @@
     if (agentResponse.ok) {
       const { data, errors } = await agentResponse.json();
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
       } else {
         agents = data.agents;
       }
     } else {
       const { message } = await agentResponse.json();
-      errorMessage = message;
+      flashMessage = message;
     }
 
     const planResponse = await getPlan(fetch, planId);
 
     if (planResponse.ok) {
       const { data, errors } = await planResponse.json();
-      console.log(data);
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
       } else {
         plan = data.plan;
       }
     } else {
       const { message } = await agentResponse.json();
-      errorMessage = message;
+      flashMessage = message;
     }
 
     return {
-      props: { labels, agents, plan, errorMessage, agentId, planId },
+      props: { labels, agents, plan, flashMessage, flashType, agentId, planId },
     };
   }
 </script>
@@ -95,7 +98,8 @@
   let processDueDate: Date | undefined;
   let processStartDate: Date | undefined;
 
-  export let errorMessage: string | undefined;
+  export let flashMessage: string | undefined;
+  export let flashType: FlashType;
 
   function filter<T>(array: Array<T>, searchValue: string): Array<T> {
     return array.filter((element: T) =>
@@ -111,6 +115,35 @@
     );
   }
 
+  async function handleUpdatePlan() {
+    try {
+      const response = await updatePlan({
+        id: planId,
+        title: planTitle,
+        description: planDescription,
+      });
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        flashMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        flashType = "ERROR";
+        console.error(flashMessage);
+        return;
+      }
+      if (data.updatePlan == 0) {
+        flashMessage = "Failed to update";
+        flashType = "ERROR";
+        return;
+      }
+      flashMessage = "Update successful";
+      flashType = "SUCCESS";
+    } catch (error) {
+      flashMessage = error.toString();
+      flashType = "ERROR";
+    }
+  }
+
   async function handleCreateProcess() {
     try {
       const response = await createProcess({
@@ -123,11 +156,11 @@
       });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        setTimeout(() => (errorMessage = undefined), 10000);
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
         return;
       }
 
@@ -142,7 +175,7 @@
       processDueDate = undefined;
       modalOpen = false;
     } catch (error) {
-      errorMessage = error.toString();
+      flashMessage = error.toString();
     }
   }
 </script>
@@ -151,7 +184,7 @@
   <title>Organizing work</title>
 </svelte:head>
 
-<Flash {errorMessage} />
+<Flash message={flashMessage} type={flashType} />
 
 {#if modalOpen}
   <div
@@ -470,8 +503,8 @@
               Cancel
             </button>
             <button
-              type="submit"
               class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              on:click|preventDefault={handleUpdatePlan}
             >
               Save
             </button>

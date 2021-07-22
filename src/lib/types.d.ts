@@ -61,3 +61,11 @@ export interface NewPlan {
   title: string;
   agentId: string;
 }
+
+export interface UpdatePlan {
+  id: string;
+  title: string;
+  description: string;
+}
+
+export type FlashType = "ERROR" | "SUCCESS";

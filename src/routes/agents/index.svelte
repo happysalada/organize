@@ -8,25 +8,25 @@
     if (res.ok) {
       const { data, errors } = await res.json();
       if (errors && errors.length > 0) {
-        const errorMessage = errors
+        const flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        console.error(errorMessage);
+        console.error(flashMessage);
         return {
-          props: { agents: [], errorMessage },
+          props: { agents: [], flashMessage, flashType: "ERROR" },
         };
       }
       const { agents } = data;
 
       return {
-        props: { agents, errorMessage: undefined },
+        props: { agents },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { errorMessage: message },
+      props: { flashMessage: message, flashType: "ERROR" },
     };
   }
 </script>
@@ -34,19 +34,20 @@
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import { createAgent, deleteAgent } from "$lib/api";
-  import type { Agent } from "$lib/types";
+  import type { Agent, FlashType } from "$lib/types";
 
   export let agents: Agent[];
   let filteredAgents: Agent[] = agents;
 
   let name = "";
   let searchQuery = "";
-  export let errorMessage: String | undefined;
+  export let flashMessage: string | undefined;
+  export let flashType: FlashType;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredAgents = agents.filter((agent: Agent) =>
-      Object.values(agent).some((agentValue: String | undefined) => {
-        let stringToSearch: String;
+      Object.values(agent).some((agentValue: string | undefined) => {
+        let stringToSearch: string;
         if (!agentValue) {
           return false;
         } else {
@@ -64,11 +65,11 @@
       const response = await promise;
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        setTimeout(() => (errorMessage = undefined), 10000);
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
         return;
       }
 
@@ -76,7 +77,8 @@
       agents = [created, ...agents];
       filteredAgents = agents;
     } catch (error) {
-      errorMessage = error.toString();
+      flashMessage = error.toString();
+      flashType = "ERROR";
     }
   }
 
@@ -85,20 +87,23 @@
       const response = await deleteAgent(uniqueName);
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        setTimeout(() => (errorMessage = undefined), 10000);
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
         return;
       } else if (data.deleteAgent == 0) {
+        flashMessage = "Deletion failed";
+        flashType = "ERROR";
         return;
       }
 
       agents = agents.filter((agent) => agent.uniqueName != uniqueName);
       filteredAgents = agents;
     } catch (error) {
-      errorMessage = error.toString();
+      flashMessage = error.toString();
+      flashType = "ERROR";
     }
   }
 </script>
@@ -107,7 +112,7 @@
   <title>Organizing work</title>
 </svelte:head>
 
-<Flash {errorMessage} />
+<Flash message={flashMessage} type={flashType} />
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">

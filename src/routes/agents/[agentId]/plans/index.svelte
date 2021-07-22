@@ -9,32 +9,32 @@
     if (res.ok) {
       const { data, errors } = await res.json();
       if (errors && errors.length > 0) {
-        const errorMessage = errors
+        const flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        console.error(errorMessage);
+        console.error(flashMessage);
         return {
-          props: { plans: [], errorMessage, agentId },
+          props: { plans: [], flashMessage, flashType: "ERROR", agentId },
         };
       }
       const { plans } = data;
 
       return {
-        props: { plans, errorMessage: undefined, agentId },
+        props: { plans, flashMessage: undefined, agentId },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { errorMessage: message, agentId },
+      props: { flashMessage: message, flashType: "ERROR", agentId },
     };
   }
 </script>
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
-  import type { Plan } from "$lib/types";
+  import type { Plan, FlashType } from "$lib/types";
   import { createPlan } from "$lib/api";
 
   export let plans: Plan[];
@@ -43,7 +43,8 @@
 
   let title = "";
   let searchQuery = "";
-  export let errorMessage: string | undefined;
+  export let flashMessage: string | undefined;
+  export let flashType: FlashType;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>
@@ -65,11 +66,11 @@
       const response = await promise;
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
-        errorMessage = errors
+        flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        setTimeout(() => (errorMessage = undefined), 10000);
-        console.error(errorMessage);
+        flashType = "ERROR";
+        console.error(flashMessage);
         return;
       }
 
@@ -77,7 +78,8 @@
       plans = [created, ...plans];
       filteredPlans = plans;
     } catch (error) {
-      errorMessage = error.toString();
+      flashMessage = error.toString();
+      flashType = "ERROR";
     }
   }
 </script>
@@ -86,7 +88,7 @@
   <title>Organizing work</title>
 </svelte:head>
 
-<Flash {errorMessage} />
+<Flash message={flashMessage} type={flashType} />
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
   <div class="max-w-2xl mx-auto">
