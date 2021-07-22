@@ -1,13 +1,15 @@
 <script context="module" lang="ts">
-  import { getLabels, getAgents } from "$lib/api";
-  import type { Agent, Label } from "$lib/types";
+  import { getLabels, getAgents, getPlan } from "$lib/api";
+  import type { Agent, Label, Plan } from "$lib/types";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
-    const agentId = page.params.id;
+    const agentId = page.params.agentId;
+    const planId = page.params.planId;
     let errorMessage: string | undefined;
     let labels: Label[] = [];
     let agents: Agent[] = [];
+    let plan: Plan;
     const labelResponse = await getLabels(fetch, agentId);
 
     if (labelResponse.ok) {
@@ -42,11 +44,28 @@
       errorMessage = message;
     }
 
+    const planResponse = await getPlan(fetch, planId);
+
+    if (planResponse.ok) {
+      const { data, errors } = await planResponse.json();
+      console.log(data);
+      if (errors && errors.length > 0) {
+        errorMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        console.error(errorMessage);
+      } else {
+        plan = data.plan;
+      }
+    } else {
+      const { message } = await agentResponse.json();
+      errorMessage = message;
+    }
+
     return {
-      props: { labels, agents, errorMessage, agentId },
+      props: { labels, agents, plan, errorMessage, agentId, planId },
     };
   }
-
 </script>
 
 <script lang="ts">
@@ -58,10 +77,12 @@
 
   export let labels: Label[];
   export let agents: Agent[];
+  export let plan: Plan;
   export let agentId: string;
+  export let planId: string;
 
-  let planTitle = "";
-  let planDescription = "";
+  let planTitle = plan.title;
+  let planDescription = plan.description;
   let processes: Process[] = [];
   let modalOpen = false;
   let creatingNewProcess = false;
@@ -124,7 +145,6 @@
       errorMessage = error.toString();
     }
   }
-
 </script>
 
 <svelte:head>

@@ -3,7 +3,7 @@
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
-    const agentId = page.params.id;
+    const agentId = page.params.agentId;
     const res = await getLabels(fetch, agentId);
 
     if (res.ok) {

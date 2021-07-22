@@ -56,3 +56,8 @@ export interface Plan {
   description: string;
   imageId: string | undefined;
 }
+
+export interface NewPlan {
+  title: string;
+  agentId: string;
+}

@@ -1,4 +1,4 @@
-import type { NewProcess, NewLabel } from "$lib/types";
+import type { NewProcess, NewLabel, NewPlan } from "$lib/types";
 import { variables } from "$lib/env";
 const base = variables.apiUrl;
 
@@ -69,7 +69,23 @@ export async function getPlans(
   });
 }
 
-export async function createPlan(title: String, agentId: String) {
+export async function getPlan(
+  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
+  planId: String
+) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    mode: "cors",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `{plan(planId: "${planId}") {id, title, description } }`,
+    }),
+  });
+}
+
+export async function createPlan({ title, agentId }: NewPlan) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
