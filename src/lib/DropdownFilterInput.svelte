@@ -1,14 +1,21 @@
 <script lang="ts">
+  import { element } from "svelte/internal";
+
   export let label: string;
   export let placeholder: string;
   export let description: string | undefined;
   export let text = (el) => el.id;
+  export let color = (el) => "indigo";
   let input = "";
   let dropdownOpen = false;
   export let list: any[];
   export let filteredList: any[];
   export let selectedList: any[];
   export const closeDropdown = () => (dropdownOpen = false);
+  let hashmap = list.reduce((acc, element) => {
+    acc[element.id] = element;
+    return acc;
+  }, {});
 
   function filter<T>(array: Array<T>, searchValue: string): Array<T> {
     return array.filter((element: T) =>
@@ -24,8 +31,15 @@
     );
   }
 
-  function handleSelection(event) {
-    console.log(event.currentTarget);
+  function handleSelection({ currentTarget }) {
+    const {
+      dataset: { elementId },
+    } = currentTarget;
+    if (selectedList.includes(elementId)) {
+      selectedList = selectedList.filter((id) => id != elementId);
+    } else {
+      selectedList = [...selectedList, currentTarget.dataset.elementId];
+    }
   }
 </script>
 
@@ -66,6 +80,37 @@
       </svg>
     </span>
   </div>
+  <ul class="flex flex-wrap">
+    {#each selectedList as selectedId}
+      <li
+        class="cursor-pointer"
+        on:click={() =>
+          (selectedList = selectedList.filter((id) => id != selectedId))}
+      >
+        <span
+          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{color(
+            hashmap[selectedId]
+          )}-100 text-{color(hashmap[selectedId])}-800"
+        >
+          {text(hashmap[selectedId])}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </span>
+      </li>
+    {/each}
+  </ul>
   {#if dropdownOpen}
     <ul
       class="absolute z-10 mt-1  bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
@@ -79,13 +124,33 @@
           class="text-gray-900 cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white"
           id={element.id}
           role="option"
-          data-element_id={element.id}
+          data-element-id={element.id}
           on:click={handleSelection}
         >
           <!-- Selected: "font-semibold", Not Selected: "font-normal" -->
           <span class="font-normal block truncate">
             {text(element)}
           </span>
+          {#if selectedList.includes(element.id)}
+            <span
+              class="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4"
+            >
+              <!-- Heroicon name: solid/check -->
+              <svg
+                class="h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+            </span>
+          {/if}
         </li>
       {/each}
 

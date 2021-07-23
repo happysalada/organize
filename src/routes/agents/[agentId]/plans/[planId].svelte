@@ -92,9 +92,10 @@
   let processTitle = "";
   let processDescription = "";
   let agentDropdown: DropdownFilterInput;
-  let processAgents: Agent[] = [];
+  let agentUlid = agents.filter(({ uniqueName }) => uniqueName == agentId)[0].id;
+  let processAgents: string[] = [agentUlid];
   let labelDropdown: DropdownFilterInput;
-  let processLabels: Label[] = [];
+  let processLabels: string[] = [];
   let processDueDate: Date | undefined;
   let processStartDate: Date | undefined;
 
@@ -153,6 +154,7 @@
         startDate: processStartDate,
         dueDate: processDueDate,
         agentId,
+        planId,
       });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
@@ -424,7 +426,7 @@
                   on:click_outside={() => agentDropdown.closeDropdown()}
                 >
                   <DropdownFilterInput
-                    label="Participants"
+                    label="In scope of"
                     placeholder={agentId}
                     description="Can be a Person, an organization, a team or a project"
                     list={agents}
@@ -445,7 +447,8 @@
                     description={undefined}
                     list={labels}
                     filteredList={labels}
-                    text={(el) => el.title}
+                    text={(el) => el.name}
+                    color={(el) => el.color}
                     bind:selectedList={processLabels}
                     bind:this={labelDropdown}
                   />
@@ -470,8 +473,8 @@
                       Cancel
                     </button>
                     <button
-                      type="submit"
                       class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      on:click|preventDefault={handleCreateProcess}
                     >
                       Save
                     </button>

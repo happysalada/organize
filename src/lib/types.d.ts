@@ -44,10 +44,11 @@ export interface Process {
 export interface NewProcess {
   title: string;
   description: string;
-  labels: Label[];
+  labels: string[];
   dueDate: Date | undefined;
   startDate: Date | undefined;
   agentId: string;
+  planId: string;
 }
 
 export interface Plan {
