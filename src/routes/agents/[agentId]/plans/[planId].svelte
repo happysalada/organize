@@ -377,7 +377,7 @@
                 <div class="px-4 py-5 sm:p-6 text-sm">
                   <p>{process.description}</p>
                 </div>
-                {#if process.labels.length > 0}
+                {#if process.labels && process.labels.length > 0}
                   <div class="px-4 py-5 sm:p-6">
                     {#each process.labels as label (label.id)}
                       <li>
