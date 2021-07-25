@@ -174,7 +174,7 @@
       processLabels = [];
       processStartDate = undefined;
       processDueDate = undefined;
-      modalOpen = false;
+      creatingNewProcess = false;
     } catch (error) {
       flashMessage = error.toString();
     }
