@@ -86,13 +86,14 @@
 
   let planTitle = plan.title;
   let planDescription = plan.description;
-  let processes: Process[] = [];
+  let processes: Process[] = plan.processes || [];
   let modalOpen = false;
   let creatingNewProcess = false;
   let processTitle = "";
   let processDescription = "";
   let agentDropdown: DropdownFilterInput;
-  let agentUlid = agents.filter(({ uniqueName }) => uniqueName == agentId)[0].id;
+  let agentUlid = agents.filter(({ uniqueName }) => uniqueName == agentId)[0]
+    .id;
   let processAgents: string[] = [agentUlid];
   let labelDropdown: DropdownFilterInput;
   let processLabels: string[] = [];
@@ -167,9 +168,7 @@
       }
 
       const { createProcess: created } = data;
-      console.log(created);
       processes = [...processes, created];
-      console.log(processes);
       processTitle = "";
       processDescription = "";
       processLabels = [];
@@ -370,7 +369,7 @@
 
             {#each processes as process (process.id)}
               <div
-                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200"
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-3 sm:col-start-2"
               >
                 <div class="px-4 py-5 sm:px-6">
                   <h3>{process.title}</h3>
@@ -378,6 +377,33 @@
                 <div class="px-4 py-5 sm:p-6 text-sm">
                   <p>{process.description}</p>
                 </div>
+                {#if process.labels.length > 0}
+                  <div class="px-4 py-5 sm:p-6">
+                    {#each process.labels as label (label.id)}
+                      <li>
+                        <span
+                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{label.color}-100 text-{label.color}-800"
+                        >
+                          {label.name}
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="h-4 w-4"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                          >
+                            <path
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M6 18L18 6M6 6l12 12"
+                            />
+                          </svg>
+                        </span>
+                      </li>
+                    {/each}
+                  </div>
+                {/if}
               </div>
             {/each}
             {#if creatingNewProcess}

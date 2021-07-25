@@ -40,6 +40,7 @@
     } else {
       selectedList = [...selectedList, currentTarget.dataset.elementId];
     }
+    dropdownOpen = false;
   }
 </script>
 

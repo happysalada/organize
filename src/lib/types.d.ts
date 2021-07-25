@@ -20,6 +20,7 @@ export interface Agent {
 }
 
 export interface Label {
+  id: string;
   name: string;
   uniqueName: string;
   color: string;
@@ -56,6 +57,7 @@ export interface Plan {
   title: string;
   description: string;
   imageId: string | undefined;
+  processes: Process[];
 }
 
 export interface NewPlan {

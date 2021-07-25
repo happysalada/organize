@@ -80,7 +80,7 @@ export async function getPlan(
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: `{plan(planId: "${planId}") {id, title, description } }`,
+      query: `{plan(planId: "${planId}") {id, title, description, processes { id, title, description, labels { id, name, color} } } }`,
     }),
   });
 }
