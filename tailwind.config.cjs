@@ -2,9 +2,11 @@ const { tailwindExtractor } = require("tailwindcss/lib/lib/purgeUnusedStyles");
 
 const safelist = [];
 
-["blue", "red", "green", "purple"].forEach((color) => {
-  safelist.push(`bg-${color}-500`, `bg-${color}-100`, `text-${color}-800`);
-});
+["blue", "red", "green", "purple", "yellow", "indigo", "pink"].forEach(
+  (color) => {
+    safelist.push(`bg-${color}-500`, `bg-${color}-100`, `text-${color}-800`);
+  }
+);
 
 module.exports = {
   purge: {
