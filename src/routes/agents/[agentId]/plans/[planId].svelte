@@ -385,31 +385,34 @@
                 <div class="px-4 py-5 sm:p-6 text-sm">
                   <p>{process.description}</p>
                 </div>
-                {#if process.labels && process.labels.length > 0}
+                {#if process.labels.length > 0}
                   <div class="px-4 py-5 sm:p-6">
-                    {#each process.labels as label (label.id)}
-                      <li>
-                        <span
-                          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{label.color}-100 text-{label.color}-800"
-                        >
-                          {label.name}
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-4 w-4"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
+                    <ul class="flex flex-wrap">
+                      {#each process.labels as label (label.id)}
+                        <li>
+                          <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{label.color ||
+                              'gray'}-100 text-{label.color || 'gray'}-800"
                           >
-                            <path
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
-                              d="M6 18L18 6M6 6l12 12"
-                            />
-                          </svg>
-                        </span>
-                      </li>
-                    {/each}
+                            {label.name}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </span>
+                        </li>
+                      {/each}
+                    </ul>
                   </div>
                 {/if}
               </div>
@@ -551,13 +554,3 @@
     </form>
   </div>
 </div>
-
-<!-- <div class="my-4">
-      {#each plan.labels || [] as { title, color }}
-        <span
-          class="inline-flex items-center mx-0.5 px-2.5 py-0.5 rounded-md text-sm font-medium bg-{color}-100 text-{color}-800"
-        >
-          {title}
-        </span>
-      {/each}
-    </div> -->

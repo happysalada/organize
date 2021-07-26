@@ -62,6 +62,7 @@
     );
   }
   async function handleSubmit() {
+    if (title === "") return;
     loadingOverlay = true;
     try {
       const promise = createPlan({ title, agentId });

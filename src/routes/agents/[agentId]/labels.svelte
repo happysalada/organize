@@ -67,6 +67,7 @@
   }
 
   async function handleSubmit() {
+    if (name === "") return;
     loadingOverlay = true;
     try {
       const response = await createLabel({ name, color, agentId });
