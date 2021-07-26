@@ -37,6 +37,7 @@
   import { createLabel, deleteLabel } from "$lib/api";
   import type { Label, FlashType } from "$lib/types";
   import clickOutside from "$lib/clickOutside";
+  import { colors } from "$lib/configuration";
 
   export let labels: Label[];
   export let agentId: string;
@@ -167,7 +168,7 @@
                 aria-labelledby="listbox-label"
                 aria-activedescendant="listbox-option-3"
               >
-                {#each ["blue", "red", "green", "purple"] as availableColor}
+                {#each colors as availableColor}
                   <li
                     class="bg-{availableColor}-500 cursor-pointer select-none relative py-2 pl-3 pr-9 h-12"
                     id="listbox-option-0"

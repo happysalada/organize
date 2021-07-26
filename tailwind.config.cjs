@@ -1,5 +1,11 @@
 const { tailwindExtractor } = require("tailwindcss/lib/lib/purgeUnusedStyles");
 
+const safelist = [];
+
+["blue", "red", "green", "purple"].forEach((color) => {
+  safelist.push(`bg-${color}-500`, `bg-${color}-100`, `text-${color}-800`);
+});
+
 module.exports = {
   purge: {
     content: ["./src/**/*.{html,js,svelte,ts}"],
@@ -15,20 +21,7 @@ module.exports = {
       keyframes: true,
     },
     // dynamic classes
-    safelist: [
-      "bg-blue-500",
-      "bg-red-500",
-      "bg-green-500",
-      "bg-purple-500",
-      "bg-blue-100",
-      "bg-red-100",
-      "bg-green-100",
-      "bg-purple-100",
-      "text-blue-800",
-      "text-red-800",
-      "text-green-800",
-      "text-purple-800",
-    ],
+    safelist,
   },
   theme: {
     extend: {},

@@ -5,6 +5,7 @@ proc dev() {
 }
 
 proc build() {
+  rm -rf build
   pnpm build
 }
 
