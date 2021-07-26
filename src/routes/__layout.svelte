@@ -1,7 +1,7 @@
 <script lang="ts">
   import "../global.css";
   import Nav from "$lib/Nav.svelte";
-  // import Footer from "../lib/Footer.svelte";
+  import Footer from "../lib/Footer.svelte";
   import { onMount } from "svelte";
 
   let loaded = false;
@@ -22,7 +22,7 @@
   </main>
 
   <footer class="footer">
-    <!-- <Footer /> -->
+    <Footer />
   </footer>
 </div>
 

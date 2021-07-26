@@ -34,6 +34,7 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
+  import Loader from "$lib/Loader.svelte";
   import { createLabel, deleteLabel } from "$lib/api";
   import type { Label, FlashType } from "$lib/types";
   import clickOutside from "$lib/clickOutside";
@@ -47,6 +48,7 @@
   let color = "";
   let searchQuery = "";
   let dropdownOpen = false;
+  let loadingOverlay = false;
   export let flashMessage: string | undefined;
   export let flashType: FlashType;
 
@@ -65,6 +67,7 @@
   }
 
   async function handleSubmit() {
+    loadingOverlay = true;
     try {
       const response = await createLabel({ name, color, agentId });
       const { data, errors } = await response.json();
@@ -84,9 +87,11 @@
     } catch (error) {
       flashMessage = error.toString();
     }
+    loadingOverlay = false;
   }
 
   async function handleDelete(uniqueName: String) {
+    loadingOverlay = true;
     try {
       const response = await deleteLabel(uniqueName);
       const { data, errors } = await response.json();
@@ -109,6 +114,7 @@
       flashMessage = error.toString();
       flashType = "ERROR";
     }
+    loadingOverlay = false;
   }
 </script>
 
@@ -193,6 +199,10 @@
             />
           </form>
         </div>
+
+        {#if loadingOverlay}
+          <Loader />
+        {/if}
 
         <div class="flex flex-col">
           <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

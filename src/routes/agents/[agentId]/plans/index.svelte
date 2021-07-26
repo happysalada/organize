@@ -34,6 +34,7 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
+  import Loader from "$lib/Loader.svelte";
   import type { Plan, FlashType } from "$lib/types";
   import { createPlan } from "$lib/api";
 
@@ -43,6 +44,7 @@
 
   let title = "";
   let searchQuery = "";
+  let loadingOverlay = false;
   export let flashMessage: string | undefined;
   export let flashType: FlashType;
 
@@ -60,6 +62,7 @@
     );
   }
   async function handleSubmit() {
+    loadingOverlay = true;
     try {
       const promise = createPlan({ title, agentId });
       title = "";
@@ -81,6 +84,7 @@
       flashMessage = error.toString();
       flashType = "ERROR";
     }
+    loadingOverlay = false;
   }
 </script>
 
@@ -108,6 +112,7 @@
         />
       </div>
     </div>
+
     <div class="bg-white shadow overflow-hidden sm:rounded-md">
       <ul class="divide-y divide-gray-200">
         <form class="mb-1" on:submit|preventDefault={handleSubmit}>
@@ -119,6 +124,11 @@
             placeholder="+ tap to create a new plan"
           />
         </form>
+
+        {#if loadingOverlay}
+          <Loader />
+        {/if}
+
         {#each filteredPlans as plan (plan.id)}
           <li class="px-4 py-4 sm:px-6">
             <div class="sm:flex">

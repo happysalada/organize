@@ -33,6 +33,7 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
+  import Loader from "$lib/Loader.svelte";
   import { createAgent, deleteAgent } from "$lib/api";
   import type { Agent, FlashType } from "$lib/types";
 
@@ -41,6 +42,7 @@
 
   let name = "";
   let searchQuery = "";
+  let loadingOverlay = false;
   export let flashMessage: string | undefined;
   export let flashType: FlashType;
 
@@ -59,6 +61,7 @@
   }
 
   async function handleSubmit() {
+    loadingOverlay = true;
     try {
       const promise = createAgent(name);
       name = "";
@@ -80,9 +83,11 @@
       flashMessage = error.toString();
       flashType = "ERROR";
     }
+    loadingOverlay = false;
   }
 
   async function handleDelete(uniqueName: String) {
+    loadingOverlay = true;
     try {
       const response = await deleteAgent(uniqueName);
       const { data, errors } = await response.json();
@@ -105,6 +110,7 @@
       flashMessage = error.toString();
       flashType = "ERROR";
     }
+    loadingOverlay = false;
   }
 </script>
 
@@ -143,6 +149,10 @@
             placeholder="+ tap to create a new agent"
           />
         </form>
+
+        {#if loadingOverlay}
+          <Loader />
+        {/if}
 
         <div class="flex flex-col">
           <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">

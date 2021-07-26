@@ -73,6 +73,7 @@
 
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
+  import Loader from "$lib/Loader.svelte";
   import DropdownFilterInput from "$lib/DropdownFilterInput.svelte";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
@@ -99,6 +100,7 @@
   let processLabels: string[] = [];
   let processDueDate: Date | undefined;
   let processStartDate: Date | undefined;
+  let loadingOverlay = false;
 
   export let flashMessage: string | undefined;
   export let flashType: FlashType;
@@ -147,6 +149,7 @@
   }
 
   async function handleCreateProcess() {
+    loadingOverlay = true;
     try {
       const response = await createProcess({
         title: processTitle,
@@ -178,6 +181,7 @@
     } catch (error) {
       flashMessage = error.toString();
     }
+    loadingOverlay = false;
   }
 </script>
 
@@ -324,7 +328,7 @@
         <div>
           <div>
             <h3 class="text-lg leading-6 font-medium text-gray-900">
-              Create a plan
+              Edit a plan
             </h3>
           </div>
 
@@ -366,6 +370,10 @@
                 />
               </div>
             </div>
+
+            {#if loadingOverlay}
+              <Loader />
+            {/if}
 
             {#each processes as process (process.id)}
               <div
