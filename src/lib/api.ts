@@ -196,3 +196,20 @@ export async function createProcess(newProcess: NewProcess) {
     }),
   });
 }
+
+export async function deleteProcess(processId: String) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation delete_process($processId: String!) {
+        deleteProcess(processId: $processId)
+      }`,
+      variables: {
+        processId,
+      },
+    }),
+  });
+}

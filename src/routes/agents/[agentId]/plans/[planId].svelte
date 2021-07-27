@@ -77,7 +77,7 @@
   import DropdownFilterInput from "$lib/DropdownFilterInput.svelte";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
-  import { createProcess } from "$lib/api";
+  import { createProcess, deleteProcess } from "$lib/api";
 
   export let labels: Label[];
   export let agents: Agent[];
@@ -178,6 +178,31 @@
       processStartDate = undefined;
       processDueDate = undefined;
       creatingNewProcess = false;
+    } catch (error) {
+      flashMessage = error.toString();
+    }
+    loadingOverlay = false;
+  }
+
+  async function handleDeleteProcess(processId) {
+    loadingOverlay = true;
+    try {
+      const response = await deleteProcess(processId);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        flashMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        flashType = "ERROR";
+        console.error(flashMessage);
+        return;
+      } else if (data.deleteProcess == 0) {
+        flashMessage = "Deletion failed";
+        flashType = "ERROR";
+        return;
+      }
+
+      processes = processes.filter((process) => process.id != processId);
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -379,8 +404,28 @@
               <div
                 class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-3 sm:col-start-2"
               >
-                <div class="px-4 py-5 sm:px-6">
+                <div class="px-4 py-5 sm:px-6 flex justify-between">
                   <h3>{process.title}</h3>
+                  <button
+                    type="button"
+                    on:click={() => handleDeleteProcess(process.id)}
+                    class="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    <!-- Heroicon name: solid/plus -->
+                    <svg
+                      class="h-5 w-5 transform rotate-45"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path
+                        fill-rule="evenodd"
+                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                        clip-rule="evenodd"
+                      />
+                    </svg>
+                  </button>
                 </div>
                 <div class="px-4 py-5 sm:p-6 text-sm">
                   <p>{process.description}</p>
