@@ -427,12 +427,14 @@
                     </svg>
                   </button>
                 </div>
-                <div class="px-4 py-5 sm:p-6 text-sm">
-                  <p>{process.description}</p>
-                </div>
+                {#if process.description}
+                  <div class="px-4 py-2 sm:p-4 text-sm text-center">
+                    <p>{process.description}</p>
+                  </div>
+                {/if}
                 {#if process.labels.length > 0}
-                  <div class="px-4 py-5 sm:p-6">
-                    <ul class="flex flex-wrap">
+                  <div class="px-4 py-5 sm:p-4">
+                    <ul class="flex flex-wrap justify-center">
                       {#each process.labels as label (label.id)}
                         <li>
                           <span
