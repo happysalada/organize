@@ -72,3 +72,10 @@ export interface UpdatePlan {
 }
 
 export type FlashType = "ERROR" | "SUCCESS";
+
+export interface UpdateProcess {
+  id: string;
+  title: string;
+  description: string;
+  labels: string[];
+}

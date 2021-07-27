@@ -1,4 +1,10 @@
-import type { NewProcess, NewLabel, NewPlan, UpdatePlan } from "$lib/types";
+import type {
+  NewProcess,
+  NewLabel,
+  NewPlan,
+  UpdatePlan,
+  UpdateProcess,
+} from "$lib/types";
 import { variables } from "$lib/env";
 const base = variables.apiUrl;
 
@@ -209,6 +215,33 @@ export async function deleteProcess(processId: String) {
       }`,
       variables: {
         processId,
+      },
+    }),
+  });
+}
+
+export async function updateProcess({
+  id,
+  title,
+  description,
+  labels,
+}: UpdateProcess) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation update_process($updateProcess: UpdateProcess!) {
+        updateProcess(updateProcess: $updateProcess)
+      }`,
+      variables: {
+        updateProcess: {
+          id,
+          title,
+          description,
+          labels,
+        },
       },
     }),
   });

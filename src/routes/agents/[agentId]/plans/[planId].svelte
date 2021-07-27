@@ -77,7 +77,7 @@
   import DropdownFilterInput from "$lib/DropdownFilterInput.svelte";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
-  import { createProcess, deleteProcess } from "$lib/api";
+  import { createProcess, deleteProcess, updateProcess } from "$lib/api";
 
   export let labels: Label[];
   export let agents: Agent[];
@@ -171,9 +171,9 @@
         console.error(flashMessage);
         return;
       }
-
       const { createProcess: created } = data;
       processes = [...processes, created];
+      displayProcesses = processes;
       processTitle = "";
       processDescription = "";
       processLabels = [];
@@ -209,6 +209,50 @@
       processTitle = "";
       processDescription = "";
       processLabels = [];
+    } catch (error) {
+      flashMessage = error.toString();
+    }
+    loadingOverlay = false;
+  }
+
+  async function handleUpdateProcess() {
+    loadingOverlay = true;
+    try {
+      const response = await updateProcess({
+        id: editProcessId,
+        title: processTitle,
+        description: processDescription,
+        labels: processLabels,
+      });
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        flashMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        flashType = "ERROR";
+        console.error(flashMessage);
+        return;
+      } else if (data.updateProcess == 0) {
+        flashMessage = "update failed";
+        flashType = "ERROR";
+        return;
+      }
+      let updatedProcessIndex = processes.findIndex(
+        ({ id }) => (id = editProcessId)
+      );
+      processes[updatedProcessIndex].title = processTitle;
+      processes[updatedProcessIndex].description = processDescription;
+      processes[updatedProcessIndex].labels = labels.filter(({ id }) =>
+        processLabels.includes(id)
+      );
+
+      processTitle = "";
+      processDescription = "";
+      processLabels = [];
+      processStartDate = undefined;
+      processDueDate = undefined;
+      editProcessId = undefined;
+      displayProcesses = processes;
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -581,12 +625,21 @@
                         Cancel
                       </button>
                     {/if}
-                    <button
-                      class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      on:click|preventDefault={handleCreateProcess}
-                    >
-                      Save
-                    </button>
+                    {#if creatingNewProcess}
+                      <button
+                        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        on:click|preventDefault={handleCreateProcess}
+                      >
+                        Save
+                      </button>
+                    {:else if editProcessId}
+                      <button
+                        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        on:click|preventDefault={handleUpdateProcess}
+                      >
+                        Save
+                      </button>
+                    {/if}
                   </div>
                 </div>
               </div>
