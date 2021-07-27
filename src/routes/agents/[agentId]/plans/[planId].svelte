@@ -88,8 +88,10 @@
   let planTitle = plan.title;
   let planDescription = plan.description;
   let processes: Process[] = plan.processes || [];
+  let displayProcesses = processes;
   let modalOpen = false;
   let creatingNewProcess = false;
+  let editProcessId: string | undefined;
   let processTitle = "";
   let processDescription = "";
   let agentDropdown: DropdownFilterInput;
@@ -203,6 +205,10 @@
       }
 
       processes = processes.filter((process) => process.id != processId);
+      editProcessId = undefined;
+      processTitle = "";
+      processDescription = "";
+      processLabels = [];
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -400,7 +406,7 @@
               <Loader />
             {/if}
 
-            {#each processes as process (process.id)}
+            {#each displayProcesses as process (process.id)}
               <div
                 class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-3 sm:col-start-2"
               >
@@ -408,21 +414,30 @@
                   <h3>{process.title}</h3>
                   <button
                     type="button"
-                    on:click={() => handleDeleteProcess(process.id)}
-                    class="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    on:click={() => {
+                      editProcessId = process.id;
+                      displayProcesses = processes.filter(
+                        (process) => process.id !== editProcessId
+                      );
+                      processTitle = process.title;
+                      processDescription = process.description;
+                      processLabels = process.labels.map((label) => label.id);
+                    }}
+                    class="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-black  hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
                     <!-- Heroicon name: solid/plus -->
                     <svg
-                      class="h-5 w-5 transform rotate-45"
                       xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
+                      class="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
                     >
                       <path
-                        fill-rule="evenodd"
-                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                        clip-rule="evenodd"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
                       />
                     </svg>
                   </button>
@@ -464,7 +479,7 @@
                 {/if}
               </div>
             {/each}
-            {#if creatingNewProcess}
+            {#if creatingNewProcess || editProcessId}
               <div
                 class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-3 sm:col-start-2"
               >
@@ -549,13 +564,23 @@
 
                 <div class="px-4 py-5 sm:px-6 bg-gray-100">
                   <div class="flex justify-center">
-                    <button
-                      type="button"
-                      class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                      on:click={() => (creatingNewProcess = false)}
-                    >
-                      Cancel
-                    </button>
+                    {#if editProcessId}
+                      <button
+                        type="button"
+                        class="bg-red-500 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        on:click={() => handleDeleteProcess(editProcessId)}
+                      >
+                        Delete
+                      </button>
+                    {:else if creatingNewProcess}
+                      <button
+                        type="button"
+                        class="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        on:click={() => (creatingNewProcess = false)}
+                      >
+                        Cancel
+                      </button>
+                    {/if}
                     <button
                       class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                       on:click|preventDefault={handleCreateProcess}
