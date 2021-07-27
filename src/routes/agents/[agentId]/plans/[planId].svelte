@@ -452,7 +452,14 @@
 
             {#each displayProcesses as process (process.id)}
               <div
-                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-3 sm:col-start-2"
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
+              >
+                <div class="px-4 py-5 sm:px-6 h-full">
+                  <h3>Inputs</h3>
+                </div>
+              </div>
+              <div
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
               >
                 <div class="px-4 py-5 sm:px-6 flex justify-between">
                   <h3>{process.title}</h3>
@@ -522,10 +529,24 @@
                   </div>
                 {/if}
               </div>
+              <div
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
+              >
+                <div class="px-4 py-5 sm:px-6 h-full">
+                  <h3>Outputs</h3>
+                </div>
+              </div>
             {/each}
             {#if creatingNewProcess || editProcessId}
               <div
-                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-3 sm:col-start-2"
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
+              >
+                <div class="px-4 py-5 sm:px-6 bg-gray-100 h-full">
+                  <h3>Inputs</h3>
+                </div>
+              </div>
+              <div
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
               >
                 <div class="px-4 py-5 sm:px-6 bg-gray-100">
                   <label
@@ -641,6 +662,13 @@
                       </button>
                     {/if}
                   </div>
+                </div>
+              </div>
+              <div
+                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
+              >
+                <div class="px-4 py-5 sm:px-6 bg-gray-100 h-full">
+                  <h3>Outputs</h3>
                 </div>
               </div>
             {:else}
