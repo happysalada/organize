@@ -8,8 +8,9 @@ import type {
 import { variables } from "$lib/env";
 const base = variables.apiUrl;
 
-export async function getAgents(
-  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>
+export async function query(
+  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
+  query: string
 ) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
@@ -18,7 +19,7 @@ export async function getAgents(
       "content-type": "application/json",
     },
     body: JSON.stringify({
-      query: "{agents {id, name, uniqueName, email } }",
+      query,
     }),
   });
 }
@@ -55,38 +56,6 @@ export async function deleteAgent(uniqueName: String) {
       variables: {
         uniqueName,
       },
-    }),
-  });
-}
-
-export async function getPlans(
-  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
-  agentId: String
-) {
-  return await fetch(`${base}/graphql`, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `{plans(agentId: "${agentId}") {id, title, description } }`,
-    }),
-  });
-}
-
-export async function getPlan(
-  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
-  planId: String
-) {
-  return await fetch(`${base}/graphql`, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `{plan(planId: "${planId}") {id, title, description, processes { id, title, description, labels { id, name, color} } } }`,
     }),
   });
 }
@@ -128,22 +97,6 @@ export async function updatePlan({ id, title, description }: UpdatePlan) {
           description,
         },
       },
-    }),
-  });
-}
-
-export async function getLabels(
-  fetch: (info: RequestInfo, init?: RequestInit) => Promise<Response>,
-  agentId: String
-) {
-  return await fetch(`${base}/graphql`, {
-    method: "POST",
-    mode: "cors",
-    headers: {
-      "content-type": "application/json",
-    },
-    body: JSON.stringify({
-      query: `{labels(agentId: "${agentId}") {id, name, color, uniqueName } }`,
     }),
   });
 }

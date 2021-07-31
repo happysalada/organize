@@ -1,9 +1,14 @@
 <script context="module" lang="ts">
-  import { getAgents } from "$lib/api";
+  import { query } from "$lib/api";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ fetch }) {
-    const res = await getAgents(fetch);
+    const res = await query(
+      fetch,
+      `{
+        agents {id, name, uniqueName, email }
+      }`
+    );
 
     if (res.ok) {
       const { data, errors } = await res.json();

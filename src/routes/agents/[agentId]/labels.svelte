@@ -1,10 +1,17 @@
 <script context="module" lang="ts">
-  import { getLabels } from "$lib/api";
+  import { query } from "$lib/api";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
     const agentId = page.params.agentId;
-    const res = await getLabels(fetch, agentId);
+    const res = await query(
+      fetch,
+      `{
+        labels(agentId: "${agentId}") {
+          id, name, color, uniqueName
+        }
+      }`
+    );
 
     if (res.ok) {
       const { data, errors } = await res.json();
