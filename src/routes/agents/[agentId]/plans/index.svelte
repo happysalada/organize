@@ -1,6 +1,9 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
 
+  let flashMessage = undefined;
+  let flashType = "ERROR";
+
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
     const agentId = page.params.agentId;
@@ -21,20 +24,20 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { plans: [], flashMessage, flashType: "ERROR", agentId },
+          props: { plans: [], flashMessage, flashType, agentId },
         };
       }
       const { plans } = data;
 
       return {
-        props: { plans, flashMessage: undefined, agentId },
+        props: { plans, flashMessage, flashType, agentId },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { flashMessage: message, flashType: "ERROR", agentId },
+      props: { flashMessage: message, flashType, agentId },
     };
   }
 </script>
