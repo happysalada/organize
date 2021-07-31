@@ -79,3 +79,14 @@ export interface UpdateProcess {
   description: string;
   labels: string[];
 }
+
+export interface Action {
+  id: string;
+  name: string;
+  inputOutput: string;
+}
+
+export interface Unit {
+  id: string;
+  label: string;
+}

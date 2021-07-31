@@ -1,15 +1,17 @@
 <script context="module" lang="ts">
   import { query, updatePlan } from "$lib/api";
-  import type { Agent, Label, Plan, FlashType } from "$lib/types";
+  import type { Action, Agent, Label, Plan, FlashType, Unit } from "$lib/types";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
     const agentId = page.params.agentId;
     const planId = page.params.planId;
     let flashMessage: string | undefined;
-    let flashType: FlashType;
+    let flashType = "ERROR";
     let labels: Label[] = [];
     let agents: Agent[] = [];
+    let actions: Action[] = [];
+    let units: Unit[] = [];
     let plan: Plan;
     const response = await query(
       fetch,
@@ -25,6 +27,8 @@
             }
           }
         } 
+        actions { id, name, inputOutput }
+        units { id, label }
       }`
     );
 
@@ -34,10 +38,9 @@
         flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
-        flashType = "ERROR";
         console.error(flashMessage);
       } else {
-        ({ labels, agents, plan } = data);
+        ({ labels, agents, plan, actions, units } = data);
       }
     } else {
       const { message } = await response.json();
@@ -45,7 +48,17 @@
     }
 
     return {
-      props: { labels, agents, plan, flashMessage, flashType, agentId, planId },
+      props: {
+        labels,
+        agents,
+        plan,
+        flashMessage,
+        flashType,
+        agentId,
+        planId,
+        actions,
+        units,
+      },
     };
   }
 </script>
@@ -60,6 +73,8 @@
 
   export let labels: Label[];
   export let agents: Agent[];
+  export let actions: Action[];
+  export let units: Unit[];
   export let plan: Plan;
   export let agentId: string;
   export let planId: string;
@@ -93,20 +108,6 @@
 
   export let flashMessage: string | undefined;
   export let flashType: FlashType;
-
-  function filter<T>(array: Array<T>, searchValue: string): Array<T> {
-    return array.filter((element: T) =>
-      Object.values(element).some((elementValue: string) => {
-        let content: string;
-        if (!elementValue) {
-          return false;
-        } else {
-          content = elementValue.toLocaleLowerCase();
-        }
-        return content.includes(searchValue);
-      })
-    );
-  }
 
   async function handleUpdatePlan() {
     try {
@@ -173,7 +174,7 @@
     loadingOverlay = false;
   }
 
-  async function handleDeleteProcess(processId) {
+  async function handleDeleteProcess(processId: string) {
     loadingOverlay = true;
     try {
       const response = await deleteProcess(processId);
