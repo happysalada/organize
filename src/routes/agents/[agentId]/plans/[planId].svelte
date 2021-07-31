@@ -53,11 +53,10 @@
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
-  import DropdownFilterInput from "$lib/DropdownFilterInput.svelte";
+  import DropdownFilterMultipleInput from "$lib/DropdownFilterMultipleInput.svelte";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
   import { createProcess, deleteProcess, updateProcess } from "$lib/api";
-  import { query_selector_all } from "svelte/internal";
 
   export let labels: Label[];
   export let agents: Agent[];
@@ -76,11 +75,11 @@
   let editProcessId: string | undefined;
   let processTitle = "";
   let processDescription = "";
-  let agentDropdown: DropdownFilterInput;
+  let agentDropdown: DropdownFilterMultipleInput;
   let agentUlid = agents.filter(({ uniqueName }) => uniqueName == agentId)[0]
     .id;
   let processAgents: string[] = [agentUlid];
-  let labelDropdown: DropdownFilterInput;
+  let labelDropdown: DropdownFilterMultipleInput;
   let processLabels: string[] = [];
   let processDueDate: Date | undefined;
   let processStartDate: Date | undefined;
@@ -689,7 +688,7 @@
                   use:clickOutside
                   on:click_outside={() => agentDropdown.closeDropdown()}
                 >
-                  <DropdownFilterInput
+                  <DropdownFilterMultipleInput
                     label="In scope of"
                     placeholder={agentId}
                     description="Can be a Person, an organization, a team or a project"
@@ -705,7 +704,7 @@
                   use:clickOutside
                   on:click_outside={() => labelDropdown.closeDropdown()}
                 >
-                  <DropdownFilterInput
+                  <DropdownFilterMultipleInput
                     label="Labels"
                     placeholder="Love"
                     description={undefined}

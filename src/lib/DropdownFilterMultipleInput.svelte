@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { element } from "svelte/internal";
-
   export let label: string;
   export let placeholder: string;
   export let description: string | undefined;
