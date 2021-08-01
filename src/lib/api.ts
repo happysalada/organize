@@ -147,7 +147,11 @@ export async function createProcess(newProcess: NewProcess) {
     },
     body: JSON.stringify({
       query: `mutation create_process($newProcess: NewProcess!) {
-        createProcess(newProcess: $newProcess) { id, title, description, labels { id, name, color } }
+        createProcess(newProcess: $newProcess) {
+          id, title, description,
+          labels { id, name, color }
+          agents { id, name, uniqueName }
+        }
       }`,
       variables: {
         newProcess,

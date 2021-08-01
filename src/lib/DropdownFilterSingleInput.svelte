@@ -2,18 +2,13 @@
   export let label: string;
   export let placeholder: string;
   export let description: string | undefined;
-  export let text = (el: any) => el.id;
-  export let color = (_: any) => "indigo";
+  export let text = (el) => el.id;
   let input = "";
   let dropdownOpen = false;
   export let list: any[];
   export let filteredList: any[];
-  export let selectedList: any[];
+  export let selected: any;
   export const closeDropdown = () => (dropdownOpen = false);
-  let hashmap = list.reduce((acc, element) => {
-    acc[element.id] = element;
-    return acc;
-  }, {});
 
   function filter<T>(array: Array<T>, searchValue: string): Array<T> {
     return array.filter((element: T) =>
@@ -33,15 +28,14 @@
     const {
       dataset: { elementId },
     } = currentTarget;
-    if (selectedList.includes(elementId)) {
-      selectedList = selectedList.filter((id) => id != elementId);
-    } else {
-      selectedList = [...selectedList, currentTarget.dataset.elementId];
-    }
+    selected = elementId;
+    let element = list.find(({ id }) => id == elementId);
+    input = text(element);
+    dropdownOpen = false;
   }
 </script>
 
-<div class="px-4 py-5 sm:px-6 bg-gray-100">
+<div class="">
   <label for="processAgents" class="block text-sm font-medium text-gray-700">
     {label}
   </label>
@@ -78,37 +72,6 @@
       </svg>
     </span>
   </div>
-  <ul class="flex flex-wrap">
-    {#each selectedList as selectedId}
-      <li
-        class="cursor-pointer"
-        on:click={() =>
-          (selectedList = selectedList.filter((id) => id != selectedId))}
-      >
-        <span
-          class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{color(
-            hashmap[selectedId]
-          )}-100 text-{color(hashmap[selectedId])}-800"
-        >
-          {text(hashmap[selectedId])}
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </span>
-      </li>
-    {/each}
-  </ul>
   {#if dropdownOpen}
     <ul
       class="absolute z-10 mt-1  bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm"
@@ -129,7 +92,7 @@
           <span class="font-normal block truncate">
             {text(element)}
           </span>
-          {#if selectedList.includes(element.id)}
+          {#if selected == element.id}
             <span
               class="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4"
             >

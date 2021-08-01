@@ -38,6 +38,7 @@ export interface Process {
   title: string;
   description: string;
   labels: Label[];
+  agents: Agent[];
   dueDate: Date | undefined;
   startDate: Date | undefined;
 }
@@ -46,9 +47,9 @@ export interface NewProcess {
   title: string;
   description: string;
   labels: string[];
+  agents: string[];
   dueDate: Date | undefined;
   startDate: Date | undefined;
-  agentId: string;
   planId: string;
 }
 
@@ -78,6 +79,7 @@ export interface UpdateProcess {
   title: string;
   description: string;
   labels: string[];
+  agents: string[];
 }
 
 export interface Action {

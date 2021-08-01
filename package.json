@@ -17,7 +17,7 @@
     "autoprefixer": "^10.3.1",
     "cssnano": "^5.0.7",
     "dotenv": "^10.0.0",
-    "eslint": "^7.31.0",
+    "eslint": "^7.32.0",
     "eslint-plugin-svelte3": "^3.2.0",
     "lint-staged": "^11.1.1",
     "mdsvex": "^0.9.8",
@@ -49,8 +49,10 @@
   },
   "typings": "global.d.ts",
   "dependencies": {
+    "@beyonk/svelte-datepicker": "^11.0.2",
     "@lukeed/uuid": "^2.0.0",
     "@tailwindcss/forms": "^0.3.3",
-    "cookie": "^0.4.1"
+    "cookie": "^0.4.1",
+    "dayjs": "^1.10.6"
   }
 }

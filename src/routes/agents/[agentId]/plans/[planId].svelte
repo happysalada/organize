@@ -22,8 +22,12 @@
         agents {id, name, uniqueName, email }
         plan(planId: "${planId}") {
           id, title, description, processes {
-            id, title, description, labels {
+            id, title, description,
+            labels {
               id, name, color
+            }
+            agents {
+              id, name, uniqueName
             }
           }
         } 
@@ -67,6 +71,14 @@
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import DropdownFilterMultipleInput from "$lib/DropdownFilterMultipleInput.svelte";
+  import DropdownFilterSingleInput from "$lib/DropdownFilterSingleInput.svelte";
+  import DatePicker from "@beyonk/svelte-datepicker/src/components/DatePicker.svelte";
+  import dayjs from "dayjs";
+  // prevent error on page reload
+  if (dayjs) {
+    dayjs.extend(relativeTime);
+  }
+  import relativeTime from "dayjs/plugin/relativeTime";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
   import { createProcess, deleteProcess, updateProcess } from "$lib/api";
@@ -102,7 +114,14 @@
   // Input
   let inputProcessId: string | undefined;
   let inputActionId: string | undefined;
+  let inputAgentId: string | undefined;
+  let inputUnitId: string | undefined;
   let inputDescription = "";
+  let inputQuantity = 0;
+  let inputDueAt = undefined;
+  let inputActionDropdown: DropdownFilterSingleInput;
+  let inputAgentDropdown: DropdownFilterSingleInput;
+  let inputUnitDropdown: DropdownFilterSingleInput;
   // Output
   let outputProcessId: string | undefined;
 
@@ -147,7 +166,7 @@
         labels: processLabels,
         startDate: processStartDate,
         dueDate: processDueDate,
-        agentId,
+        agents: processAgents,
         planId,
       });
       const { data, errors } = await response.json();
@@ -165,6 +184,7 @@
       processTitle = "";
       processDescription = "";
       processLabels = [];
+      processAgents = [agentUlid];
       processStartDate = undefined;
       processDueDate = undefined;
       creatingNewProcess = false;
@@ -211,6 +231,7 @@
         title: processTitle,
         description: processDescription,
         labels: processLabels,
+        agents: processAgents,
       });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
@@ -226,12 +247,15 @@
         return;
       }
       let updatedProcessIndex = processes.findIndex(
-        ({ id }) => (id = editProcessId)
+        ({ id }) => id == editProcessId
       );
       processes[updatedProcessIndex].title = processTitle;
       processes[updatedProcessIndex].description = processDescription;
       processes[updatedProcessIndex].labels = labels.filter(({ id }) =>
         processLabels.includes(id)
+      );
+      processes[updatedProcessIndex].agents = agents.filter(({ id }) =>
+        processAgents.includes(id)
       );
 
       processTitle = "";
@@ -496,23 +520,21 @@
                   <div class="py-5">
                     {#if inputProcessId}
                       <div class="grid grid-cols-1 gap-y-6 gap-x-4">
-                        <div>
-                          <label
-                            for="action"
-                            class="block text-sm font-medium text-gray-700"
-                          >
-                            Action
-                          </label>
-                          <div class="mt-1 flex rounded-md shadow-sm">
-                            <input
-                              type="text"
-                              name="action"
-                              id="action"
-                              class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
-                              bind:value={inputActionId}
-                              placeholder="Change the world"
-                            />
-                          </div>
+                        <div
+                          use:clickOutside
+                          on:click_outside={() =>
+                            inputActionDropdown.closeDropdown()}
+                        >
+                          <DropdownFilterSingleInput
+                            label="Action"
+                            placeholder="work"
+                            description=""
+                            list={actions}
+                            filteredList={actions}
+                            text={(el) => el.name}
+                            bind:selected={inputActionId}
+                            bind:this={inputActionDropdown}
+                          />
                         </div>
 
                         <div>
@@ -532,6 +554,80 @@
                               placeholder="Start from the begining"
                             />
                           </div>
+                        </div>
+
+                        <div
+                          use:clickOutside
+                          on:click_outside={() =>
+                            inputAgentDropdown.closeDropdown()}
+                        >
+                          <DropdownFilterSingleInput
+                            label="Assign to"
+                            placeholder=""
+                            description=""
+                            list={agents}
+                            filteredList={agents}
+                            text={(el) => el.name}
+                            bind:selected={inputAgentId}
+                            bind:this={inputAgentDropdown}
+                          />
+                        </div>
+
+                        <div class="flex justify-center">
+                          <div class="">
+                            <label
+                              for="inputQuantity"
+                              class="block text-sm font-medium text-gray-700"
+                            >
+                              Quantity
+                            </label>
+                            <div class="mt-1 flex rounded-md shadow-sm">
+                              <input
+                                type="number"
+                                name="inputQuantity"
+                                id="inputQuantity"
+                                class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
+                                bind:value={inputQuantity}
+                                placeholder="Change the world"
+                              />
+                            </div>
+                          </div>
+                          <div
+                            use:clickOutside
+                            on:click_outside={() =>
+                              inputUnitDropdown.closeDropdown()}
+                          >
+                            <DropdownFilterSingleInput
+                              label="Unit"
+                              placeholder="hour"
+                              description=""
+                              list={units}
+                              filteredList={units}
+                              text={(el) => el.label}
+                              bind:selected={inputUnitId}
+                              bind:this={inputUnitDropdown}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <DatePicker bind:selected={inputDueAt}>
+                            {#if inputDueAt}
+                              <p>Due date {dayjs(inputDueAt).fromNow()}</p>
+                              <button
+                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                on:click|preventDefault
+                              >
+                                Edit due date
+                              </button>
+                            {:else}
+                              <button
+                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                                on:click|preventDefault
+                              >
+                                Add due date
+                              </button>
+                            {/if}
+                          </DatePicker>
                         </div>
                         <div class="flex justify-center">
                           <button
@@ -615,6 +711,35 @@
                               'gray'}-100 text-{label.color || 'gray'}-800"
                           >
                             {label.name}
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              class="h-4 w-4"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                                stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12"
+                              />
+                            </svg>
+                          </span>
+                        </li>
+                      {/each}
+                    </ul>
+                  </div>
+                {/if}
+                {#if process.agents.length > 0}
+                  <div class="px-4 py-5 sm:p-4">
+                    <ul class="flex flex-wrap justify-center">
+                      {#each process.agents as agent (agent.id)}
+                        <li>
+                          <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+                          >
+                            {agent.name}
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               class="h-4 w-4"
