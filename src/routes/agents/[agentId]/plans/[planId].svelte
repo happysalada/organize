@@ -454,7 +454,7 @@
 {/if}
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8 ">
-  <div class="max-w-2xl mx-auto">
+  <div class="max-w-4xl mx-auto">
     <form class="space-y-8 divide-y divide-gray-200">
       <div class="space-y-8 divide-y divide-gray-200">
         <div>
