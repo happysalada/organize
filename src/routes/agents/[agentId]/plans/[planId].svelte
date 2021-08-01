@@ -576,16 +576,16 @@
                         <Commitment
                           bind:this={inputCommitment}
                           bind:processId={inputProcessId}
-                          bind:inputActionId
-                          bind:inputAgentId
-                          bind:inputUnitId
-                          bind:inputDescription
-                          bind:inputDueAt
-                          bind:inputQuantity
+                          bind:actionId={inputActionId}
+                          bind:agentId={inputAgentId}
+                          bind:unitId={inputUnitId}
+                          bind:description={inputDescription}
+                          bind:dueAt={inputDueAt}
+                          bind:quantity={inputQuantity}
                           actions={inputActions}
                           {agents}
                           {units}
-                          {handleCreateInput}
+                          handleCreate={handleCreateInput}
                         />
                       </div>
                     {:else}
@@ -724,16 +724,16 @@
                         <Commitment
                           bind:this={outputCommitment}
                           bind:processId={outputProcessId}
-                          bind:outputActionId
-                          bind:outputAgentId
-                          bind:outputUnitId
-                          bind:outputDescription
-                          bind:outputDueAt
-                          bind:outputQuantity
+                          bind:actionId={outputActionId}
+                          bind:agentId={outputAgentId}
+                          bind:unitId={outputUnitId}
+                          bind:description={outputDescription}
+                          bind:dueAt={outputDueAt}
+                          bind:quantity={outputQuantity}
                           actions={outputActions}
                           {agents}
                           {units}
-                          {handleCreateOutput}
+                          handleCreate={handleCreateOutput}
                         />
                       </div>
                     {:else}

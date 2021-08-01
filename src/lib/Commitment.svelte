@@ -4,28 +4,28 @@
   import type { Action, Agent, Unit } from "$lib/types";
   // Actions
   export let actions: Action[];
-  export let inputActionId: string | undefined;
-  export let inputDescription: string | undefined;
-  let inputActionDropdown: DropdownFilterSingleInput;
+  export let actionId: string | undefined;
+  export let description: string | undefined;
+  let actionDropdown: DropdownFilterSingleInput;
   // Agents
   export let agents: Agent[];
-  export let inputAgentId: string | undefined;
-  export let inputQuantity = 0;
-  let inputAgentDropdown: DropdownFilterSingleInput;
+  export let agentId: string | undefined;
+  export let quantity = 0;
+  let agentDropdown: DropdownFilterSingleInput;
   // Units
   export let units: Unit[];
-  export let inputUnitId: string | undefined;
-  let inputUnitDropdown: DropdownFilterSingleInput;
+  export let unitId: string | undefined;
+  let unitDropdown: DropdownFilterSingleInput;
   // dueAt
-  export let inputDueAt: Date | undefined;
+  export let dueAt: Date | undefined;
 
   export let processId: string | undefined;
-  export let handleCreateInput;
+  export let handleCreate;
 
   export const closeDropdown = () => {
-    inputActionDropdown.closeDropdown();
-    inputAgentDropdown.closeDropdown();
-    inputUnitDropdown.closeDropdown();
+    actionDropdown.closeDropdown();
+    agentDropdown.closeDropdown();
+    unitDropdown.closeDropdown();
   };
 
   import dayjs from "dayjs";
@@ -43,8 +43,8 @@
   list={actions}
   filteredList={actions}
   text={(el) => el.name}
-  bind:selected={inputActionId}
-  bind:this={inputActionDropdown}
+  bind:selected={actionId}
+  bind:this={actionDropdown}
 />
 
 <div>
@@ -57,7 +57,7 @@
       name="inputDescription"
       rows="3"
       class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-      bind:value={inputDescription}
+      bind:value={description}
       placeholder="Start from the begining"
     />
   </div>
@@ -70,8 +70,8 @@
   list={agents}
   filteredList={agents}
   text={(el) => el.name}
-  bind:selected={inputAgentId}
-  bind:this={inputAgentDropdown}
+  bind:selected={agentId}
+  bind:this={agentDropdown}
 />
 
 <div class="flex justify-center">
@@ -85,7 +85,7 @@
         name="inputQuantity"
         id="inputQuantity"
         class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
-        bind:value={inputQuantity}
+        bind:value={quantity}
         placeholder="Change the world"
       />
     </div>
@@ -97,14 +97,14 @@
     list={units}
     filteredList={units}
     text={(el) => el.label}
-    bind:selected={inputUnitId}
-    bind:this={inputUnitDropdown}
+    bind:selected={unitId}
+    bind:this={unitDropdown}
   />
 </div>
 <div>
-  <DatePicker bind:selected={inputDueAt}>
-    {#if inputDueAt}
-      <p>Due date {dayjs(inputDueAt).fromNow()}</p>
+  <DatePicker bind:selected={dueAt}>
+    {#if dueAt}
+      <p>Due date {dayjs(dueAt).fromNow()}</p>
       <button
         class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         on:click|preventDefault
@@ -133,7 +133,7 @@
   </button>
   <button
     class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-    on:click|preventDefault={handleCreateInput}
+    on:click|preventDefault={handleCreate}
   >
     Save
   </button>
