@@ -71,14 +71,7 @@
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import DropdownFilterMultipleInput from "$lib/DropdownFilterMultipleInput.svelte";
-  import DropdownFilterSingleInput from "$lib/DropdownFilterSingleInput.svelte";
-  import DatePicker from "@beyonk/svelte-datepicker/src/components/DatePicker.svelte";
-  import dayjs from "dayjs";
-  // prevent error on page reload
-  if (dayjs) {
-    dayjs.extend(relativeTime);
-  }
-  import relativeTime from "dayjs/plugin/relativeTime";
+  import Commitment from "$lib/Commitment.svelte";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
   import { createProcess, deleteProcess, updateProcess } from "$lib/api";
@@ -90,6 +83,12 @@
   export let plan: Plan;
   export let agentId: string;
   export let planId: string;
+  let inputActions = actions.filter(
+    ({ inputOutput }) => inputOutput == "INPUT"
+  );
+  let outputActions = actions.filter(
+    ({ inputOutput }) => inputOutput == "OUTPUT"
+  );
 
   // Plan
   let planTitle = plan.title;
@@ -119,11 +118,16 @@
   let inputDescription = "";
   let inputQuantity = 0;
   let inputDueAt = undefined;
-  let inputActionDropdown: DropdownFilterSingleInput;
-  let inputAgentDropdown: DropdownFilterSingleInput;
-  let inputUnitDropdown: DropdownFilterSingleInput;
+  let inputCommitment: Commitment;
   // Output
   let outputProcessId: string | undefined;
+  let outputActionId: string | undefined;
+  let outputAgentId: string | undefined;
+  let outputUnitId: string | undefined;
+  let outputDescription = "";
+  let outputQuantity = 0;
+  let outputDueAt = undefined;
+  let outputCommitment: Commitment;
 
   export let flashMessage: string | undefined;
   export let flashType: FlashType;
@@ -310,6 +314,51 @@
       // editProcessId = undefined;
       // displayProcesses = processes;
       inputProcessId = undefined;
+    } catch (error) {
+      flashMessage = error.toString();
+    }
+    loadingOverlay = false;
+  }
+
+  async function handleCreateOutput() {
+    loadingOverlay = true;
+    try {
+      // const response = await updateProcess({
+      //   id: editProcessId,
+      //   title: processTitle,
+      //   description: processDescription,
+      //   labels: processLabels,
+      // });
+      // const { data, errors } = await response.json();
+      // if (errors && errors.length > 0) {
+      //   flashMessage = errors
+      //     .map(({ message }) => message.toString())
+      //     .join("\n");
+      //   flashType = "ERROR";
+      //   console.error(flashMessage);
+      //   return;
+      // } else if (data.updateProcess == 0) {
+      //   flashMessage = "update failed";
+      //   flashType = "ERROR";
+      //   return;
+      // }
+      // let updatedProcessIndex = processes.findIndex(
+      //   ({ id }) => (id = editProcessId)
+      // );
+      // processes[updatedProcessIndex].title = processTitle;
+      // processes[updatedProcessIndex].description = processDescription;
+      // processes[updatedProcessIndex].labels = labels.filter(({ id }) =>
+      //   processLabels.includes(id)
+      // );
+
+      // processTitle = "";
+      // processDescription = "";
+      // processLabels = [];
+      // processStartDate = undefined;
+      // processDueDate = undefined;
+      // editProcessId = undefined;
+      // displayProcesses = processes;
+      outputProcessId = undefined;
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -509,7 +558,7 @@
 
             {#each displayProcesses as process (process.id)}
               <div
-                class="{inputProcessId
+                class="{inputProcessId && inputProcessId == process.id
                   ? 'bg-gray-200'
                   : 'bg-white'} overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
               >
@@ -518,134 +567,26 @@
                 >
                   <h3 class="">Inputs</h3>
                   <div class="py-5">
-                    {#if inputProcessId}
-                      <div class="grid grid-cols-1 gap-y-6 gap-x-4">
-                        <div
-                          use:clickOutside
-                          on:click_outside={() =>
-                            inputActionDropdown.closeDropdown()}
-                        >
-                          <DropdownFilterSingleInput
-                            label="Action"
-                            placeholder="work"
-                            description=""
-                            list={actions}
-                            filteredList={actions}
-                            text={(el) => el.name}
-                            bind:selected={inputActionId}
-                            bind:this={inputActionDropdown}
-                          />
-                        </div>
-
-                        <div>
-                          <label
-                            for="description"
-                            class="block text-sm font-medium text-gray-700"
-                          >
-                            Description
-                          </label>
-                          <div class="mt-1">
-                            <textarea
-                              id="inputDescription"
-                              name="inputDescription"
-                              rows="3"
-                              class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-                              bind:value={inputDescription}
-                              placeholder="Start from the begining"
-                            />
-                          </div>
-                        </div>
-
-                        <div
-                          use:clickOutside
-                          on:click_outside={() =>
-                            inputAgentDropdown.closeDropdown()}
-                        >
-                          <DropdownFilterSingleInput
-                            label="Assign to"
-                            placeholder=""
-                            description=""
-                            list={agents}
-                            filteredList={agents}
-                            text={(el) => el.name}
-                            bind:selected={inputAgentId}
-                            bind:this={inputAgentDropdown}
-                          />
-                        </div>
-
-                        <div class="flex justify-center">
-                          <div class="">
-                            <label
-                              for="inputQuantity"
-                              class="block text-sm font-medium text-gray-700"
-                            >
-                              Quantity
-                            </label>
-                            <div class="mt-1 flex rounded-md shadow-sm">
-                              <input
-                                type="number"
-                                name="inputQuantity"
-                                id="inputQuantity"
-                                class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
-                                bind:value={inputQuantity}
-                                placeholder="Change the world"
-                              />
-                            </div>
-                          </div>
-                          <div
-                            use:clickOutside
-                            on:click_outside={() =>
-                              inputUnitDropdown.closeDropdown()}
-                          >
-                            <DropdownFilterSingleInput
-                              label="Unit"
-                              placeholder="hour"
-                              description=""
-                              list={units}
-                              filteredList={units}
-                              text={(el) => el.label}
-                              bind:selected={inputUnitId}
-                              bind:this={inputUnitDropdown}
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <DatePicker bind:selected={inputDueAt}>
-                            {#if inputDueAt}
-                              <p>Due date {dayjs(inputDueAt).fromNow()}</p>
-                              <button
-                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                on:click|preventDefault
-                              >
-                                Edit due date
-                              </button>
-                            {:else}
-                              <button
-                                class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                                on:click|preventDefault
-                              >
-                                Add due date
-                              </button>
-                            {/if}
-                          </DatePicker>
-                        </div>
-                        <div class="flex justify-center">
-                          <button
-                            type="button"
-                            class="bg-red-500 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                            on:click={() => {
-                              inputProcessId = undefined;
-                            }}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                            on:click|preventDefault={handleCreateInput}
-                          >
-                            Save
-                          </button>
-                        </div>
+                    {#if inputProcessId && inputProcessId == process.id}
+                      <div
+                        use:clickOutside
+                        class="grid grid-cols-1 gap-y-6 gap-x-4"
+                        on:click_outside={() => inputCommitment.closeDropdown()}
+                      >
+                        <Commitment
+                          bind:this={inputCommitment}
+                          bind:processId={inputProcessId}
+                          bind:inputActionId
+                          bind:inputAgentId
+                          bind:inputUnitId
+                          bind:inputDescription
+                          bind:inputDueAt
+                          bind:inputQuantity
+                          actions={inputActions}
+                          {agents}
+                          {units}
+                          {handleCreateInput}
+                        />
                       </div>
                     {:else}
                       <button
@@ -661,6 +602,7 @@
                   </div>
                 </div>
               </div>
+
               <div
                 class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
               >
@@ -761,14 +703,55 @@
                   </div>
                 {/if}
               </div>
+
               <div
-                class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
+                class="{outputProcessId && outputProcessId == process.id
+                  ? 'bg-gray-200'
+                  : 'bg-white'} overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2"
               >
-                <div class="px-4 py-5 sm:px-6 h-full">
-                  <h3>Outputs</h3>
+                <div
+                  class="px-4 py-5 sm:px-6 h-full flex flex-col justify-between items-center"
+                >
+                  <h3 class="">Outputs</h3>
+                  <div class="py-5">
+                    {#if outputProcessId && outputProcessId == process.id}
+                      <div
+                        use:clickOutside
+                        class="grid grid-cols-1 gap-y-6 gap-x-4"
+                        on:click_outside={() =>
+                          outputCommitment.closeDropdown()}
+                      >
+                        <Commitment
+                          bind:this={outputCommitment}
+                          bind:processId={outputProcessId}
+                          bind:outputActionId
+                          bind:outputAgentId
+                          bind:outputUnitId
+                          bind:outputDescription
+                          bind:outputDueAt
+                          bind:outputQuantity
+                          actions={outputActions}
+                          {agents}
+                          {units}
+                          {handleCreateOutput}
+                        />
+                      </div>
+                    {:else}
+                      <button
+                        type="button"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        on:click={() => {
+                          outputProcessId = process.id;
+                        }}
+                      >
+                        Add Output
+                      </button>
+                    {/if}
+                  </div>
                 </div>
               </div>
             {/each}
+
             {#if creatingNewProcess || editProcessId}
               <div
                 class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-start-3 sm:col-span-2 "
