@@ -177,12 +177,7 @@ export async function deleteProcess(processId: String) {
   });
 }
 
-export async function updateProcess({
-  id,
-  title,
-  description,
-  labels,
-}: UpdateProcess) {
+export async function updateProcess(updateProcess: UpdateProcess) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
@@ -193,12 +188,7 @@ export async function updateProcess({
         updateProcess(updateProcess: $updateProcess)
       }`,
       variables: {
-        updateProcess: {
-          id,
-          title,
-          description,
-          labels,
-        },
+        updateProcess,
       },
     }),
   });

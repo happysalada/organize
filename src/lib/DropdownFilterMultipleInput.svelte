@@ -33,10 +33,10 @@
     const {
       dataset: { elementId },
     } = currentTarget;
-    if (selectedList.includes(elementId)) {
+    if (selectedList.find(({ id }) => id == elementId)) {
       selectedList = selectedList.filter((id) => id != elementId);
     } else {
-      selectedList = [...selectedList, currentTarget.dataset.elementId];
+      selectedList = [...selectedList, hashmap[elementId]];
     }
   }
 </script>
@@ -79,18 +79,18 @@
     </span>
   </div>
   <ul class="flex flex-wrap">
-    {#each selectedList as selectedId}
+    {#each selectedList as selected (selected.id)}
       <li
         class="cursor-pointer"
         on:click={() =>
-          (selectedList = selectedList.filter((id) => id != selectedId))}
+          (selectedList = selectedList.filter((id) => id != selected.id))}
       >
         <span
           class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-{color(
-            hashmap[selectedId]
-          )}-100 text-{color(hashmap[selectedId])}-800"
+            hashmap[selected.id]
+          )}-100 text-{color(hashmap[selected.id])}-800"
         >
-          {text(hashmap[selectedId])}
+          {text(hashmap[selected.id])}
           <svg
             xmlns="http://www.w3.org/2000/svg"
             class="h-4 w-4"
@@ -129,7 +129,7 @@
           <span class="font-normal block truncate">
             {text(element)}
           </span>
-          {#if selectedList.includes(element.id)}
+          {#if selectedList.find(({ id }) => id == element.id)}
             <span
               class="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4"
             >

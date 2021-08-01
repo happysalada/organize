@@ -92,3 +92,16 @@ export interface Unit {
   id: string;
   label: string;
 }
+
+export interface Commitment {
+  id: string;
+}
+
+export interface NewCommitment {
+  actionId: string | undefined;
+  description: string | undefined;
+  agentId: string | undefined;
+  quantity: number;
+  unitId: string | undefined;
+  dueAt: Date | undefined;
+}
