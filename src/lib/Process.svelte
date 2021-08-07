@@ -6,12 +6,13 @@
   import type { Process } from "$lib/types";
   export let agents;
   export let actions;
+  export let resourceSpecifications;
   export let units;
   export let labels;
   export let process: Process;
   export let flashMessage;
   export let flashType;
-  export let agentId;
+  export let agentUniqueName;
   export let onDelete;
   export let onUpdate;
 
@@ -29,7 +30,8 @@
   let loadingOverlay = false;
   const newCommitment = {
     actionId: undefined,
-    agentId: undefined,
+    agentUniqueName: undefined,
+    resourceSpecificationId: undefined,
     unitId: undefined,
     description: "",
     quantity: 0,
@@ -159,6 +161,7 @@
             actions={inputActions}
             {agents}
             {units}
+            {resourceSpecifications}
             handleSubmit={handleCreateInput}
             handleCancel={() => (createInput = false)}
           />
@@ -183,7 +186,7 @@
     {labels}
     {agents}
     bind:process
-    {agentId}
+    {agentUniqueName}
     onSubmit={() => {
       isEditing = false;
       onUpdate();
@@ -307,6 +310,7 @@
             actions={outputActions}
             {agents}
             {units}
+            {resourceSpecifications}
             handleSubmit={handleCreateOutput}
             handleCancel={() => (createOutput = false)}
           />

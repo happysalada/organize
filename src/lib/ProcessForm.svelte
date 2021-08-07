@@ -4,7 +4,7 @@
   export let process;
   export let agents;
   export let labels;
-  export let agentId;
+  export let agentUniqueName;
   export let onSubmit;
   export let onCancel;
 
@@ -49,7 +49,7 @@
   <div use:clickOutside on:click_outside={() => agentDropdown.closeDropdown()}>
     <DropdownFilterMultipleInput
       label="In scope of"
-      placeholder={agentId}
+      placeholder={agentUniqueName}
       description="Can be a Person, an organization, a team or a project"
       list={agents}
       filteredList={agents}

@@ -30,7 +30,7 @@ export interface Label {
 export interface NewLabel {
   name: string;
   color: string;
-  agentId: string;
+  agentUniqueName: string;
 }
 
 export interface Process {
@@ -63,7 +63,7 @@ export interface Plan {
 
 export interface NewPlan {
   title: string;
-  agentId: string;
+  agentUniqueName: string;
 }
 
 export interface UpdatePlan {
@@ -100,8 +100,20 @@ export interface Commitment {
 export interface NewCommitment {
   actionId: string | undefined;
   description: string | undefined;
-  agentId: string | undefined;
+  resourceSpecificationId: string | undefined;
+  agentUniqueName: string | undefined;
   quantity: number;
   unitId: string | undefined;
   dueAt: Date | undefined;
+}
+
+export interface ResourceSpecification {
+  id: string;
+  name: string;
+  uniqueName: string;
+}
+
+export interface NewResourceSpecification {
+  name: string;
+  agentUniqueName: string;
 }

@@ -4,11 +4,14 @@
   let flashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
-  export async function load({ fetch }) {
+  export async function load({ page, fetch }) {
+    const agentUniqueName = page.params.agentUniqueName;
     const res = await query(
       fetch,
       `{
-        agents {id, name, uniqueName, email }
+        resourceSpecifications(agentUniqueName: "${agentUniqueName}") {
+          id, name, uniqueName
+        }
       }`
     );
 
@@ -20,20 +23,30 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { agents: [], flashMessage, flashType },
+          props: {
+            resourceSpecifications: [],
+            agentUniqueName,
+            flashMessage,
+            flashType,
+          },
         };
       }
-      const { agents } = data;
+      const { resourceSpecifications } = data;
 
       return {
-        props: { agents, flashMessage, flashType },
+        props: {
+          resourceSpecifications,
+          agentUniqueName,
+          flashMessage,
+          flashType,
+        },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { flashMessage: message, flashType },
+      props: { agentUniqueName, flashMessage: message, flashType },
     };
   }
 </script>
@@ -41,11 +54,16 @@
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
-  import { createAgent, deleteAgent } from "$lib/api";
-  import type { Agent, FlashType } from "$lib/types";
+  import {
+    createResourceSpecification,
+    deleteResourceSpecification,
+  } from "$lib/api";
+  import type { ResourceSpecification, FlashType } from "$lib/types";
 
-  export let agents: Agent[];
-  let filteredAgents: Agent[] = agents;
+  export let resourceSpecifications: ResourceSpecification[] = [];
+  export let agentUniqueName: string;
+  let list = resourceSpecifications;
+  let filtered: ResourceSpecification[] = list;
 
   let name = "";
   let searchQuery = "";
@@ -54,13 +72,13 @@
   export let flashType: FlashType;
 
   function search({ currentTarget: { value: searchValue } }) {
-    filteredAgents = agents.filter((agent: Agent) =>
-      Object.values(agent).some((agentValue: string | undefined) => {
-        let stringToSearch: string;
-        if (!agentValue) {
+    filtered = list.filter((el: ResourceSpecification) =>
+      Object.values(el).some((value: String | undefined) => {
+        let stringToSearch: String;
+        if (!value) {
           return false;
         } else {
-          stringToSearch = agentValue.toLocaleLowerCase();
+          stringToSearch = value.toLocaleLowerCase();
         }
         return stringToSearch.includes(searchValue);
       })
@@ -68,11 +86,13 @@
   }
 
   async function handleSubmit() {
+    if (name === "") return;
     loadingOverlay = true;
     try {
-      const promise = createAgent(name);
-      name = "";
-      const response = await promise;
+      const response = await createResourceSpecification({
+        name,
+        agentUniqueName,
+      });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         flashMessage = errors
@@ -83,12 +103,12 @@
         return;
       }
 
-      const { createAgent: created } = data;
-      agents = [created, ...agents];
-      filteredAgents = agents;
+      const { createResourceSpecification: created } = data;
+      list = [created, ...list];
+      filtered = list;
+      name = "";
     } catch (error) {
       flashMessage = error.toString();
-      flashType = "ERROR";
     }
     loadingOverlay = false;
   }
@@ -96,7 +116,7 @@
   async function handleDelete(uniqueName: String) {
     loadingOverlay = true;
     try {
-      const response = await deleteAgent(uniqueName);
+      const response = await deleteResourceSpecification(uniqueName);
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         flashMessage = errors
@@ -105,14 +125,14 @@
         flashType = "ERROR";
         console.error(flashMessage);
         return;
-      } else if (data.deleteAgent == 0) {
+      } else if (data.deleteLabel == 0) {
         flashMessage = "Deletion failed";
         flashType = "ERROR";
         return;
       }
 
-      agents = agents.filter((agent) => agent.uniqueName != uniqueName);
-      filteredAgents = agents;
+      list = list.filter((el) => el.uniqueName != uniqueName);
+      filtered = list;
     } catch (error) {
       flashMessage = error.toString();
       flashType = "ERROR";
@@ -145,17 +165,19 @@
         />
       </div>
     </div>
-    <div class="bg-white shadow overflow-hidden sm:rounded-md">
+    <div class="bg-white shadow sm:rounded-md">
       <ul class="divide-y divide-gray-200">
-        <form class="mb-1" on:submit|preventDefault={handleSubmit}>
-          <input
-            class="p-4 text-lg focus:outline-none focus:ring focus:ring-indigo-500 w-full"
-            name="name"
-            bind:value={name}
-            aria-label="Create Agent"
-            placeholder="+ tap to create a new agent"
-          />
-        </form>
+        <div class="flex h-full space-x-0.5">
+          <form class="mb-1 w-2/3" on:submit|preventDefault={handleSubmit}>
+            <input
+              class="p-4 text-lg focus:outline-none w-full border-b-4 border-indigo-500 border-opacity-0 focus:border-opacity-100"
+              name="name"
+              bind:value={name}
+              aria-label="Create a Resource Specification"
+              placeholder="+ tap to create a new resource specification"
+            />
+          </form>
+        </div>
 
         {#if loadingOverlay}
           <Loader />
@@ -182,16 +204,7 @@
                         scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                       >
-                        Email
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Plans</span>
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Labels</span>
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Resource specifications</span>
+                        Color
                       </th>
                       <th scope="col" class="relative px-6 py-3">
                         <span class="sr-only">Delete</span>
@@ -199,50 +212,21 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {#each filteredAgents as agent, index (agent.id)}
+                    {#each filtered as element, index (element.uniqueName)}
                       <tr class={index % 2 == 0 ? "bg-white" : "bg-gray-50"}>
                         <td
                           class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                         >
-                          {agent.name}
+                          {element.name}
                         </td>
                         <td
-                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"
-                        >
-                          {agent.email || ""}
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                        >
-                          <a
-                            href="agents/{agent.uniqueName}/plans"
-                            class="text-indigo-600 hover:text-indigo-900"
-                            >Plans</a
-                          >
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                        >
-                          <a
-                            href="agents/{agent.uniqueName}/labels"
-                            class="text-indigo-600 hover:text-indigo-900"
-                            >Labels</a
-                          >
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                        >
-                          <a
-                            href="agents/{agent.uniqueName}/resourceSpecifications"
-                            class="text-indigo-600 hover:text-indigo-900"
-                            >Resource specifications</a
-                          >
-                        </td>
+                          class="px-6 py-4 whitespace-nowrap text-sm bg-gray'-500"
+                        />
                         <td
                           class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                         >
                           <button
-                            on:click={() => handleDelete(agent.uniqueName)}
+                            on:click={() => handleDelete(element.uniqueName)}
                             type="button"
                             class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           >

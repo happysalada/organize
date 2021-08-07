@@ -5,11 +5,11 @@
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
-    const agentId = page.params.agentId;
+    const agentUniqueName = page.params.agentUniqueName;
     const res = await query(
       fetch,
       `{
-        labels(agentId: "${agentId}") {
+        labels(agentUniqueName: "${agentUniqueName}") {
           id, name, color, uniqueName
         }
       }`
@@ -23,20 +23,20 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { labels: [], agentId, flashMessage, flashType },
+          props: { labels: [], agentUniqueName, flashMessage, flashType },
         };
       }
       const { labels } = data;
 
       return {
-        props: { labels, agentId, flashMessage, flashType },
+        props: { labels, agentUniqueName, flashMessage, flashType },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { agentId, flashMessage: message, flashType },
+      props: { agentUniqueName, flashMessage: message, flashType },
     };
   }
 </script>
@@ -50,7 +50,7 @@
   import { colors } from "$lib/configuration";
 
   export let labels: Label[];
-  export let agentId: string;
+  export let agentUniqueName: string;
   let filteredLabels: Label[] = labels;
 
   let name = "";
@@ -79,7 +79,7 @@
     if (name === "") return;
     loadingOverlay = true;
     try {
-      const response = await createLabel({ name, color, agentId });
+      const response = await createLabel({ name, color, agentUniqueName });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         flashMessage = errors

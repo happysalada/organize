@@ -6,11 +6,11 @@
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
-    const agentId = page.params.agentId;
+    const agentUniqueName = page.params.agentUniqueName;
     const res = await query(
       fetch,
       `{
-        plans(agentId: "${agentId}") {
+        plans(agentUniqueName: "${agentUniqueName}") {
           id, title, description
         }
       }`
@@ -24,20 +24,20 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { plans: [], flashMessage, flashType, agentId },
+          props: { plans: [], flashMessage, flashType, agentUniqueName },
         };
       }
       const { plans } = data;
 
       return {
-        props: { plans, flashMessage, flashType, agentId },
+        props: { plans, flashMessage, flashType, agentUniqueName },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { flashMessage: message, flashType, agentId },
+      props: { flashMessage: message, flashType, agentUniqueName },
     };
   }
 </script>
@@ -49,7 +49,7 @@
   import { createPlan } from "$lib/api";
 
   export let plans: Plan[];
-  export let agentId: string;
+  export let agentUniqueName: string;
   let filteredPlans: Plan[] = plans;
 
   let title = "";
@@ -75,7 +75,7 @@
     if (title === "") return;
     loadingOverlay = true;
     try {
-      const promise = createPlan({ title, agentId });
+      const promise = createPlan({ title, agentUniqueName });
       title = "";
       const response = await promise;
       const { data, errors } = await response.json();
@@ -162,7 +162,7 @@
                 {/if}
               </div>
               <div class="w-full">
-                <a href="/agents/{agentId}/plans/{plan.id}">
+                <a href="/agents/{agentUniqueName}/plans/{plan.id}">
                   <div class="w-full flex justify-between">
                     <h4 class="text-lg font-bold">{plan.title}</h4>
                     <svg

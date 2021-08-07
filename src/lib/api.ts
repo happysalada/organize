@@ -2,6 +2,7 @@ import type {
   NewProcess,
   NewLabel,
   NewPlan,
+  NewResourceSpecification,
   UpdatePlan,
   UpdateProcess,
 } from "$lib/types";
@@ -60,7 +61,7 @@ export async function deleteAgent(uniqueName: String) {
   });
 }
 
-export async function createPlan({ title, agentId }: NewPlan) {
+export async function createPlan({ title, agentUniqueName }: NewPlan) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
@@ -73,7 +74,7 @@ export async function createPlan({ title, agentId }: NewPlan) {
       variables: {
         newPlan: {
           title,
-          agentId,
+          agentUniqueName,
         },
       },
     }),
@@ -101,7 +102,7 @@ export async function updatePlan({ id, title, description }: UpdatePlan) {
   });
 }
 
-export async function createLabel({ name, color, agentId }: NewLabel) {
+export async function createLabel({ name, color, agentUniqueName }: NewLabel) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
@@ -115,7 +116,7 @@ export async function createLabel({ name, color, agentId }: NewLabel) {
         newLabel: {
           name,
           color,
-          agentId,
+          agentUniqueName,
         },
       },
     }),
@@ -189,6 +190,46 @@ export async function updateProcess(updateProcess: UpdateProcess) {
       }`,
       variables: {
         updateProcess,
+      },
+    }),
+  });
+}
+
+export async function createResourceSpecification({
+  name,
+  agentUniqueName,
+}: NewResourceSpecification) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation create_resource_specification($newResourceSpecification: NewResourceSpecification!) {
+        createResourceSpecification(newResourceSpecification: $newResourceSpecification) { id, name, uniqueName }
+      }`,
+      variables: {
+        newResourceSpecification: {
+          name,
+          agentUniqueName,
+        },
+      },
+    }),
+  });
+}
+
+export async function deleteResourceSpecification(uniqueName: String) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation delete_resource_specification($uniqueName: String!) {
+        deleteResourceSpecification(uniqueName: $uniqueName)
+      }`,
+      variables: {
+        uniqueName,
       },
     }),
   });

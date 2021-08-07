@@ -1,10 +1,18 @@
 <script context="module" lang="ts">
   import { query, updatePlan } from "$lib/api";
-  import type { Action, Agent, Label, Plan, FlashType, Unit } from "$lib/types";
+  import type {
+    Action,
+    Agent,
+    Label,
+    Plan,
+    FlashType,
+    ResourceSpecification,
+    Unit,
+  } from "$lib/types";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
-    const agentId = page.params.agentId;
+    const agentUniqueName = page.params.agentUniqueName;
     const planId = page.params.planId;
     let flashMessage: string | undefined;
     let flashType = "ERROR";
@@ -12,12 +20,16 @@
     let agents: Agent[] = [];
     let actions: Action[] = [];
     let units: Unit[] = [];
+    let resourceSpecifications: ResourceSpecification[] = [];
     let plan: Plan;
     const response = await query(
       fetch,
       `{
-        labels(agentId: "${agentId}") {
+        labels(agentUniqueName: "${agentUniqueName}") {
           id, name, color, uniqueName
+        }
+        resourceSpecifications(agentUniqueName: "${agentUniqueName}") {
+          id, name, uniqueName
         }
         agents {id, name, uniqueName, email }
         plan(planId: "${planId}") {
@@ -44,7 +56,8 @@
           .join("\n");
         console.error(flashMessage);
       } else {
-        ({ labels, agents, plan, actions, units } = data);
+        ({ labels, agents, resourceSpecifications, plan, actions, units } =
+          data);
       }
     } else {
       const { message } = await response.json();
@@ -55,10 +68,11 @@
       props: {
         labels,
         agents,
+        resourceSpecifications,
         plan,
         flashMessage,
         flashType,
-        agentId,
+        agentUniqueName,
         planId,
         actions,
         units,
@@ -79,11 +93,14 @@
   export let agents: Agent[];
   export let actions: Action[];
   export let units: Unit[];
+  export let resourceSpecifications: ResourceSpecification[];
   export let plan: Plan;
-  export let agentId: string;
+  export let agentUniqueName: string;
   export let planId: string;
 
-  let mainAgent = agents.filter(({ uniqueName }) => uniqueName == agentId)[0];
+  let mainAgent = agents.filter(
+    ({ uniqueName }) => uniqueName == agentUniqueName
+  )[0];
 
   // Plan
   let planTitle = plan.title;
@@ -289,8 +306,9 @@
                 {actions}
                 {units}
                 {labels}
+                {resourceSpecifications}
                 bind:process
-                {agentId}
+                {agentUniqueName}
                 {flashMessage}
                 {flashType}
                 onDelete={() => handleDeleteProcess(process.id)}
@@ -302,7 +320,7 @@
               <ProcessForm
                 {agents}
                 {labels}
-                {agentId}
+                {agentUniqueName}
                 bind:process={newProcess}
                 onSubmit={handleCreateProcess}
                 onCancel={() => (creatingNewProcess = false)}

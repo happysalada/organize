@@ -1,11 +1,20 @@
 <script lang="ts">
   import DropdownFilterSingleInput from "./DropdownFilterSingleInput.svelte";
   import DatePicker from "@beyonk/svelte-datepicker/src/components/DatePicker.svelte";
-  import type { Action, Agent, NewCommitment, Unit } from "$lib/types";
+  import type {
+    Action,
+    Agent,
+    NewCommitment,
+    ResourceSpecification,
+    Unit,
+  } from "$lib/types";
+  export let commitment: NewCommitment;
   // Actions
   export let actions: Action[];
-  export let commitment: NewCommitment;
   let actionDropdown: DropdownFilterSingleInput;
+  // Resource specification
+  export let resourceSpecifications: ResourceSpecification[];
+  let resourceSpecificationDropdown: DropdownFilterSingleInput;
   // Agents
   export let agents: Agent[];
   let agentDropdown: DropdownFilterSingleInput;
@@ -58,13 +67,24 @@
 </div>
 
 <DropdownFilterSingleInput
+  label="Resource specification"
+  placeholder="document"
+  description=""
+  list={resourceSpecifications}
+  filteredList={resourceSpecifications}
+  text={(el) => el.name}
+  bind:selected={commitment.resourceSpecificationId}
+  bind:this={resourceSpecificationDropdown}
+/>
+
+<DropdownFilterSingleInput
   label="Assign to"
   placeholder=""
   description=""
   list={agents}
   filteredList={agents}
   text={(el) => el.name}
-  bind:selected={commitment.agentId}
+  bind:selected={commitment.agentUniqueName}
   bind:this={agentDropdown}
 />
 
