@@ -41,6 +41,7 @@ export interface Process {
   agents: Agent[];
   dueDate: Date | undefined;
   startDate: Date | undefined;
+  commitments: Commitment[];
 }
 
 export interface NewProcess {
@@ -105,6 +106,7 @@ export interface NewCommitment {
   quantity: number;
   unitId: string | undefined;
   dueAt: Date | undefined;
+  processId: string;
 }
 
 export interface ResourceSpecification {

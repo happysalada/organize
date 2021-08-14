@@ -1,7 +1,8 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
+  import type { FlashType } from "$lib/types";
   let flashMessage = undefined;
-  let flashType = "ERROR";
+  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
@@ -45,7 +46,7 @@
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import { createLabel, deleteLabel } from "$lib/api";
-  import type { Label, FlashType } from "$lib/types";
+  import type { Label } from "$lib/types";
   import clickOutside from "$lib/clickOutside";
   import { colors } from "$lib/configuration";
 
@@ -58,8 +59,6 @@
   let searchQuery = "";
   let dropdownOpen = false;
   let loadingOverlay = false;
-  export let flashMessage: string | undefined;
-  export let flashType: FlashType;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredLabels = labels.filter((label: Label) =>

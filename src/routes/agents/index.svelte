@@ -1,7 +1,8 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
+  import type { FlashType } from "$lib/types";
   let flashMessage = undefined;
-  let flashType = "ERROR";
+  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ fetch }) {
@@ -42,7 +43,7 @@
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import { createAgent, deleteAgent } from "$lib/api";
-  import type { Agent, FlashType } from "$lib/types";
+  import type { Agent } from "$lib/types";
 
   export let agents: Agent[];
   let filteredAgents: Agent[] = agents;
@@ -50,8 +51,6 @@
   let name = "";
   let searchQuery = "";
   let loadingOverlay = false;
-  export let flashMessage: string | undefined;
-  export let flashType: FlashType;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredAgents = agents.filter((agent: Agent) =>

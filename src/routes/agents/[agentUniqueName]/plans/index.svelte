@@ -1,8 +1,9 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
+  import type { FlashType } from "$lib/types";
 
   let flashMessage = undefined;
-  let flashType = "ERROR";
+  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
@@ -45,7 +46,7 @@
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
-  import type { Plan, FlashType } from "$lib/types";
+  import type { Plan } from "$lib/types";
   import { createPlan } from "$lib/api";
 
   export let plans: Plan[];
@@ -55,8 +56,6 @@
   let title = "";
   let searchQuery = "";
   let loadingOverlay = false;
-  export let flashMessage: string | undefined;
-  export let flashType: FlashType;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>

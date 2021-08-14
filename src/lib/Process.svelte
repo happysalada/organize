@@ -4,6 +4,7 @@
   import ProcessForm from "$lib/ProcessForm.svelte";
   import clickOutside from "$lib/clickOutside";
   import type { Process } from "$lib/types";
+  import { createCommitment } from "$lib/api";
   export let agents;
   export let actions;
   export let resourceSpecifications;
@@ -36,98 +37,35 @@
     description: "",
     quantity: 0,
     dueAt: undefined,
+    processId: process.id,
   };
   // Input
-  let input = Object.assign({ inputOutput: "INPUT" }, newCommitment);
-  let inputCommitment: Commitment;
+  let inputCommitment = Object.assign({ inputOutput: "INPUT" }, newCommitment);
+  let inputComponent: Commitment;
   // Output
-  let output = Object.assign({ inputOutput: "OUTPUT" }, newCommitment);
-  let outputCommitment: Commitment;
+  let outputCommitment = Object.assign(
+    { inputOutput: "OUTPUT" },
+    newCommitment
+  );
+  let outputComponent: Commitment;
 
-  async function handleCreateInput() {
+  async function handleCreate(commitment) {
     loadingOverlay = true;
     try {
-      // const response = await updateProcess({
-      //   id: editProcessId,
-      //   title: processTitle,
-      //   description: processDescription,
-      //   labels: processLabels,
-      // });
-      // const { data, errors } = await response.json();
-      // if (errors && errors.length > 0) {
-      //   flashMessage = errors
-      //     .map(({ message }) => message.toString())
-      //     .join("\n");
-      //   flashType = "ERROR";
-      //   console.error(flashMessage);
-      //   return;
-      // } else if (data.updateProcess == 0) {
-      //   flashMessage = "update failed";
-      //   flashType = "ERROR";
-      //   return;
-      // }
-      // let updatedProcessIndex = processes.findIndex(
-      //   ({ id }) => (id = editProcessId)
-      // );
-      // processes[updatedProcessIndex].title = processTitle;
-      // processes[updatedProcessIndex].description = processDescription;
-      // processes[updatedProcessIndex].labels = labels.filter(({ id }) =>
-      //   processLabels.includes(id)
-      // );
-
-      // processTitle = "";
-      // processDescription = "";
-      // processLabels = [];
-      // processStartDate = undefined;
-      // processDueDate = undefined;
-      // editProcessId = undefined;
-      // displayProcesses = processes;
-      createInput = false;
-    } catch (error) {
-      flashMessage = error.toString();
-    }
-    loadingOverlay = false;
-  }
-
-  async function handleCreateOutput() {
-    loadingOverlay = true;
-    try {
-      // const response = await updateProcess({
-      //   id: editProcessId,
-      //   title: processTitle,
-      //   description: processDescription,
-      //   labels: processLabels,
-      // });
-      // const { data, errors } = await response.json();
-      // if (errors && errors.length > 0) {
-      //   flashMessage = errors
-      //     .map(({ message }) => message.toString())
-      //     .join("\n");
-      //   flashType = "ERROR";
-      //   console.error(flashMessage);
-      //   return;
-      // } else if (data.updateProcess == 0) {
-      //   flashMessage = "update failed";
-      //   flashType = "ERROR";
-      //   return;
-      // }
-      // let updatedProcessIndex = processes.findIndex(
-      //   ({ id }) => (id = editProcessId)
-      // );
-      // processes[updatedProcessIndex].title = processTitle;
-      // processes[updatedProcessIndex].description = processDescription;
-      // processes[updatedProcessIndex].labels = labels.filter(({ id }) =>
-      //   processLabels.includes(id)
-      // );
-
-      // processTitle = "";
-      // processDescription = "";
-      // processLabels = [];
-      // processStartDate = undefined;
-      // processDueDate = undefined;
-      // editProcessId = undefined;
-      // displayProcesses = processes;
-      createOutput = false;
+      const response = await createCommitment(commitment);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        flashMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        flashType = "ERROR";
+        console.error(flashMessage);
+        return;
+      }
+      const { createPlan: created } = data;
+      process.commitments = [...process.commitments, created];
+      process = process;
+      commitment = Object.assign({}, newCommitment);
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -153,16 +91,19 @@
         <div
           use:clickOutside
           class="grid grid-cols-1 gap-y-6 gap-x-4"
-          on:click_outside={() => inputCommitment.closeDropdown()}
+          on:click_outside={() => inputComponent.closeDropdown()}
         >
           <Commitment
-            bind:this={inputCommitment}
-            bind:commitment={input}
+            bind:this={inputComponent}
+            bind:commitment={inputCommitment}
             actions={inputActions}
             {agents}
             {units}
             {resourceSpecifications}
-            handleSubmit={handleCreateInput}
+            handleSubmit={() => {
+              handleCreate(inputCommitment);
+              createInput = false;
+            }}
             handleCancel={() => (createInput = false)}
           />
         </div>
@@ -302,16 +243,19 @@
         <div
           use:clickOutside
           class="grid grid-cols-1 gap-y-6 gap-x-4"
-          on:click_outside={() => outputCommitment.closeDropdown()}
+          on:click_outside={() => outputComponent.closeDropdown()}
         >
           <Commitment
-            bind:this={outputCommitment}
-            bind:commitment={output}
+            bind:this={outputComponent}
+            bind:commitment={outputCommitment}
             actions={outputActions}
             {agents}
             {units}
             {resourceSpecifications}
-            handleSubmit={handleCreateOutput}
+            handleSubmit={() => {
+              handleCreate(outputCommitment);
+              createOutput = false;
+            }}
             handleCancel={() => (createOutput = false)}
           />
         </div>

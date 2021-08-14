@@ -41,6 +41,18 @@
             agents {
               id, name, uniqueName
             }
+            commitments {
+              id, description
+              action {
+                id, name
+              }
+              resourceSpecification {
+                id, name
+              }
+              unit {
+                id, label
+              }
+            }
           }
         } 
         actions { id, name, inputOutput }
