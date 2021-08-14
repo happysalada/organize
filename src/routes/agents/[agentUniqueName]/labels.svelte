@@ -134,7 +134,7 @@
 <Flash message={flashMessage} type={flashType} />
 
 <div class="max-w-7xl my-4 mx-auto px-4 sm:px-6 lg:px-8">
-  <div class="max-w-2xl mx-auto">
+  <div class="max-w-4xl mx-auto">
     <div class="my-8">
       <label for="email" class="block text-sm font-medium text-gray-700"
         >Search</label
