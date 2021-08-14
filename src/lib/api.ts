@@ -154,6 +154,7 @@ export async function createProcess(newProcess: NewProcess) {
           id, title, description,
           labels { id, name, color }
           agents { id, name, uniqueName }
+          commitments { id }
         }
       }`,
       variables: {
