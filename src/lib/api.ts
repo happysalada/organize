@@ -4,6 +4,7 @@ import type {
   NewPlan,
   NewProcess,
   NewResourceSpecification,
+  UpdateCommitment,
   UpdatePlan,
   UpdateProcess,
 } from "$lib/types";
@@ -244,10 +245,59 @@ export async function createCommitment(newCommitment: NewCommitment) {
     },
     body: JSON.stringify({
       query: `mutation create_commitment($newCommitment: NewCommitment!) {
-        createCommitment(newCommitment: $newCommitment)
+        createCommitment(newCommitment: $newCommitment) {
+          id, description, quantity, actionId,
+          resourceSpecificationId, unitId, assignedAgentId
+          action {
+            id, name, inputOutput
+          }
+          resourceSpecification {
+            id, name
+          }
+          unit {
+            id, label
+          }
+          assignedAgent {
+            id, name
+          }
+        }
       }`,
       variables: {
         newCommitment,
+      },
+    }),
+  });
+}
+
+export async function deleteCommitment(id: String) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation delete_commitment($id: String!) {
+        deleteCommitment(id: $id)
+      }`,
+      variables: {
+        id,
+      },
+    }),
+  });
+}
+
+export async function updateCommitment(updateCommitment: UpdateCommitment) {
+  return await fetch(`${base}/graphql`, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      query: `mutation update_commitment($updateCommitment: UpdateCommitment!) {
+        updateCommitment(updateCommitment: $updateCommitment)
+      }`,
+      variables: {
+        updateCommitment,
       },
     }),
   });

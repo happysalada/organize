@@ -42,15 +42,19 @@
               id, name, uniqueName
             }
             commitments {
-              id, description
+              id, description, quantity, actionId,
+              resourceSpecificationId, unitId, assignedAgentId
               action {
-                id, name
+                id, name, inputOutput
               }
               resourceSpecification {
                 id, name
               }
               unit {
                 id, label
+              }
+              assignedAgent {
+                id, name
               }
             }
           }
@@ -211,7 +215,7 @@
       }
 
       processes = processes.filter((process) => process.id != processId);
-      newProcess = Object.assign({}, initialNewProcess);
+      // newProcess = Object.assign({}, initialNewProcess);
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -244,7 +248,6 @@
         ({ id }) => id == process.id
       );
       processes[updatedProcessIndex] = process;
-      newProcess = Object.assign({}, initialNewProcess);
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -336,6 +339,7 @@
                 bind:process={newProcess}
                 onSubmit={handleCreateProcess}
                 onCancel={() => (creatingNewProcess = false)}
+                cancelText="Cancel"
               />
             {:else}
               <div class="sm:col-span-6 flex justify-center">

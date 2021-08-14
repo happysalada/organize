@@ -1,152 +1,156 @@
 <script lang="ts">
-  import DropdownFilterSingleInput from "./DropdownFilterSingleInput.svelte";
-  import DatePicker from "@beyonk/svelte-datepicker/src/components/DatePicker.svelte";
-  import type {
-    Action,
-    Agent,
-    NewCommitment,
-    ResourceSpecification,
-    Unit,
-  } from "$lib/types";
-  export let commitment: NewCommitment;
-  // Actions
-  export let actions: Action[];
-  let actionDropdown: DropdownFilterSingleInput;
-  // Resource specification
-  export let resourceSpecifications: ResourceSpecification[];
-  let resourceSpecificationDropdown: DropdownFilterSingleInput;
-  // Agents
-  export let agents: Agent[];
-  let agentDropdown: DropdownFilterSingleInput;
-  // Units
-  export let units: Unit[];
-  let unitDropdown: DropdownFilterSingleInput;
+  import Loader from "$lib/Loader.svelte";
+  import CommitmentForm from "$lib/CommitmentForm.svelte";
+  import type { Commitment } from "$lib/types";
+  import clickOutside from "$lib/clickOutside";
+  export let agents;
+  export let actions;
+  export let resourceSpecifications;
+  export let units;
+  export let commitment: Commitment;
+  export let onDelete;
+  export let onUpdate;
 
-  export let handleSubmit;
-  export let handleCancel;
+  let inputActions = actions.filter(
+    ({ inputOutput }) => inputOutput == "INPUT"
+  );
+  let outputActions = actions.filter(
+    ({ inputOutput }) => inputOutput == "OUTPUT"
+  );
 
-  export const closeDropdown = () => {
-    actionDropdown.closeDropdown();
-    agentDropdown.closeDropdown();
-    unitDropdown.closeDropdown();
-  };
+  let isEditing = false;
 
-  import dayjs from "dayjs";
-  import relativeTime from "dayjs/plugin/relativeTime";
-  // prevent error on page reload
-  if (dayjs) {
-    dayjs.extend(relativeTime);
-  }
+  let loadingOverlay = false;
+  // Input
+  let commitmentForm: CommitmentForm;
 </script>
 
-<DropdownFilterSingleInput
-  label="Action"
-  placeholder="work"
-  description=""
-  list={actions}
-  filteredList={actions}
-  text={(el) => el.name}
-  bind:selected={commitment.actionId}
-  bind:this={actionDropdown}
-/>
+{#if loadingOverlay}
+  <Loader />
+{/if}
 
-<div>
-  <label for="description" class="block text-sm font-medium text-gray-700">
-    Description
-  </label>
-  <div class="mt-1">
-    <textarea
-      id="inputDescription"
-      name="inputDescription"
-      rows="3"
-      class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border border-gray-300 rounded-md"
-      bind:value={commitment.description}
-      placeholder="Start from the begining"
-    />
-  </div>
-</div>
-
-<DropdownFilterSingleInput
-  label="Resource specification"
-  placeholder="document"
-  description=""
-  list={resourceSpecifications}
-  filteredList={resourceSpecifications}
-  text={(el) => el.name}
-  bind:selected={commitment.resourceSpecificationId}
-  bind:this={resourceSpecificationDropdown}
-/>
-
-<DropdownFilterSingleInput
-  label="Assign to"
-  placeholder=""
-  description=""
-  list={agents}
-  filteredList={agents}
-  text={(el) => el.name}
-  bind:selected={commitment.agentUniqueName}
-  bind:this={agentDropdown}
-/>
-
-<div class="flex justify-center">
-  <div class="">
-    <label for="inputQuantity" class="block text-sm font-medium text-gray-700">
-      Quantity
-    </label>
-    <div class="mt-1 flex rounded-md shadow-sm">
-      <input
-        type="number"
-        name="inputQuantity"
-        id="inputQuantity"
-        class="flex-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full min-w-0 rounded-md sm:text-sm border-gray-300"
-        bind:value={commitment.quantity}
-        placeholder="Change the world"
-      />
+<div
+  class="{isEditing
+    ? 'bg-gray-200'
+    : 'bg-white'} overflow-hidden shadow rounded-lg divide-y divide-gray-200 sm:col-span-2 my-4"
+>
+  {#if isEditing}
+    <div
+      class="px-4 py-5 sm:px-6 h-full flex flex-col justify-between items-center"
+    >
+      <div
+        use:clickOutside
+        class="grid grid-cols-1 gap-y-6 gap-x-4"
+        on:click_outside={() => commitmentForm.closeDropdown()}
+      >
+        <CommitmentForm
+          bind:commitment
+          bind:this={commitmentForm}
+          {actions}
+          {agents}
+          {units}
+          {resourceSpecifications}
+          handleSubmit={() => {
+            isEditing = false;
+            onUpdate();
+          }}
+          handleCancel={onDelete}
+          cancelText="Delete"
+        />
+      </div>
     </div>
-  </div>
-  <DropdownFilterSingleInput
-    label="Unit"
-    placeholder="hour"
-    description=""
-    list={units}
-    filteredList={units}
-    text={(el) => el.label}
-    bind:selected={commitment.unitId}
-    bind:this={unitDropdown}
-  />
-</div>
-<div>
-  <DatePicker bind:selected={commitment.dueAt}>
-    {#if commitment.dueAt}
-      <p>Due date {dayjs(commitment.dueAt).fromNow()}</p>
+  {:else}
+    <div class="px-4 py-5 sm:px-6 flex justify-between">
+      <h3>{commitment.description || "No description"}</h3>
       <button
-        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        on:click|preventDefault
+        type="button"
+        on:click={() => (isEditing = true)}
+        class="inline-flex items-center p-1.5 border border-transparent rounded-full shadow-sm text-black  hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
-        Edit due date
+        <!-- Heroicon name: solid/plus -->
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          class="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+          />
+        </svg>
       </button>
-    {:else}
-      <button
-        class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-        on:click|preventDefault
-      >
-        Add due date
-      </button>
-    {/if}
-  </DatePicker>
-</div>
-<div class="flex justify-center">
-  <button
-    type="button"
-    class="bg-red-500 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-    on:click|preventDefault={handleCancel}
-  >
-    Cancel
-  </button>
-  <button
-    class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-    on:click|preventDefault={handleSubmit}
-  >
-    Save
-  </button>
+    </div>
+    <div class="px-4 py-5 sm:p-4">
+      <ul class="flex flex-wrap justify-center">
+        <li>
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+          >
+            {commitment.action.name}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </span>
+        </li>
+        <li>
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+          >
+            {commitment.quantity}
+            {commitment.unit.label}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </span>
+        </li>
+        <li>
+          <span
+            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800"
+          >
+            {commitment.resourceSpecification.name}
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </span>
+        </li>
+      </ul>
+    </div>
+  {/if}
 </div>

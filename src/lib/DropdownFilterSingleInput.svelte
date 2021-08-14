@@ -3,12 +3,18 @@
   export let placeholder: string;
   export let description: string | undefined;
   export let text = (el) => el.id;
-  let input = "";
   let dropdownOpen = false;
   export let list: any[];
   export let filteredList: any[];
   export let selected: any;
   export const closeDropdown = () => (dropdownOpen = false);
+  let input = "";
+  if (selected !== undefined) {
+    const element = list.find(({ id }) => id == selected);
+    if (element) {
+      input = text(element);
+    }
+  }
 
   function filter<T>(array: Array<T>, searchValue: string): Array<T> {
     return array.filter((element: T) =>

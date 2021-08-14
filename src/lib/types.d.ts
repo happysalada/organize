@@ -96,13 +96,25 @@ export interface Unit {
 
 export interface Commitment {
   id: string;
+  description: string;
+  action: Action;
+  actionId: string;
+  quantity: number;
+  unit: Unit;
+  unitId: string;
+  resourceSpecification: ResourceSpecification;
+  resourceSpecificationId: string;
+  dueAt: Date | undefined;
+  processId: string;
+  assignedAgentId: string | undefined;
+  assignedAgent: Agent | undefined;
 }
 
 export interface NewCommitment {
   actionId: string | undefined;
   description: string | undefined;
   resourceSpecificationId: string | undefined;
-  agentUniqueName: string | undefined;
+  assignedAgentId: string | undefined;
   quantity: number;
   unitId: string | undefined;
   dueAt: Date | undefined;
@@ -118,4 +130,15 @@ export interface ResourceSpecification {
 export interface NewResourceSpecification {
   name: string;
   agentUniqueName: string;
+}
+
+export interface UpdateCommitment {
+  id: string;
+  description: string;
+  quantity: number;
+  unitId: string | undefined;
+  actionId: string | undefined;
+  resourceSpecificationId: string | undefined;
+  assignedAgentId: string | undefined;
+  dueAt: Date | undefined;
 }

@@ -1,10 +1,15 @@
 <script lang="ts">
   import Loader from "$lib/Loader.svelte";
-  import Commitment from "$lib/Commitment.svelte";
+  import CommitmentComponent from "$lib/Commitment.svelte";
+  import CommitmentForm from "$lib/CommitmentForm.svelte";
   import ProcessForm from "$lib/ProcessForm.svelte";
   import clickOutside from "$lib/clickOutside";
-  import type { Process } from "$lib/types";
-  import { createCommitment } from "$lib/api";
+  import type { Commitment, Process } from "$lib/types";
+  import {
+    createCommitment,
+    updateCommitment,
+    deleteCommitment,
+  } from "$lib/api";
   export let agents;
   export let actions;
   export let resourceSpecifications;
@@ -31,7 +36,7 @@
   let loadingOverlay = false;
   const newCommitment = {
     actionId: undefined,
-    agentUniqueName: undefined,
+    assignedAgentId: undefined,
     resourceSpecificationId: undefined,
     unitId: undefined,
     description: "",
@@ -40,14 +45,11 @@
     processId: process.id,
   };
   // Input
-  let inputCommitment = Object.assign({ inputOutput: "INPUT" }, newCommitment);
-  let inputComponent: Commitment;
+  let inputCommitment = Object.assign({}, newCommitment);
+  let inputComponent: CommitmentForm;
   // Output
-  let outputCommitment = Object.assign(
-    { inputOutput: "OUTPUT" },
-    newCommitment
-  );
-  let outputComponent: Commitment;
+  let outputCommitment = Object.assign({}, newCommitment);
+  let outputComponent: CommitmentForm;
 
   async function handleCreate(commitment) {
     loadingOverlay = true;
@@ -62,10 +64,78 @@
         console.error(flashMessage);
         return;
       }
-      const { createPlan: created } = data;
+      const { createCommitment: created } = data;
       process.commitments = [...process.commitments, created];
       process = process;
       commitment = Object.assign({}, newCommitment);
+    } catch (error) {
+      flashMessage = error.toString();
+    }
+    loadingOverlay = false;
+  }
+
+  async function handleDeleteCommitment(commitmentId: string) {
+    loadingOverlay = true;
+    try {
+      const response = await deleteCommitment(commitmentId);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        flashMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        flashType = "ERROR";
+        console.error(flashMessage);
+        return;
+      } else if (data.deleteCommitment == 0) {
+        flashMessage = "Deletion failed";
+        flashType = "ERROR";
+        return;
+      }
+
+      process.commitments = process.commitments.filter(
+        ({ id }) => id != commitmentId
+      );
+      // refresh the ui
+      process = process;
+    } catch (error) {
+      flashMessage = error.toString();
+    }
+    loadingOverlay = false;
+  }
+
+  async function handleUpdateCommitment(commitment: Commitment) {
+    loadingOverlay = true;
+    const { id, description, quantity, dueAt } = commitment;
+    let updateParams = {
+      id,
+      description,
+      actionId: commitment.action?.id,
+      quantity,
+      unitId: commitment.unit?.id,
+      resourceSpecificationId: commitment.resourceSpecification?.id,
+      dueAt,
+      assignedAgentId: commitment.assignedAgent?.id,
+    };
+    try {
+      const response = await updateCommitment(updateParams);
+      const { data, errors } = await response.json();
+      if (errors && errors.length > 0) {
+        flashMessage = errors
+          .map(({ message }) => message.toString())
+          .join("\n");
+        flashType = "ERROR";
+        console.error(flashMessage);
+        return;
+      } else if (data.updateCommitment == 0) {
+        flashMessage = "update failed";
+        flashType = "ERROR";
+        loadingOverlay = false;
+        return;
+      }
+      let index = process.commitments.findIndex(({ id }) => id == process.id);
+      process.commitments[index] = commitment;
+      // refresh the UI
+      process = process;
     } catch (error) {
       flashMessage = error.toString();
     }
@@ -86,6 +156,17 @@
     class="px-4 py-5 sm:px-6 h-full flex flex-col justify-between items-center"
   >
     <h3 class="">Inputs</h3>
+    {#each process.commitments.filter(({ action }) => action?.inputOutput == "INPUT") as commitment (commitment.id)}
+      <CommitmentComponent
+        actions={inputActions}
+        bind:commitment
+        {agents}
+        {units}
+        {resourceSpecifications}
+        onDelete={() => handleDeleteCommitment(commitment.id)}
+        onUpdate={() => handleUpdateCommitment(commitment)}
+      />
+    {/each}
     <div class="py-5">
       {#if createInput}
         <div
@@ -93,7 +174,7 @@
           class="grid grid-cols-1 gap-y-6 gap-x-4"
           on:click_outside={() => inputComponent.closeDropdown()}
         >
-          <Commitment
+          <CommitmentForm
             bind:this={inputComponent}
             bind:commitment={inputCommitment}
             actions={inputActions}
@@ -105,6 +186,7 @@
               createInput = false;
             }}
             handleCancel={() => (createInput = false)}
+            cancelText="Cancel"
           />
         </div>
       {:else}
@@ -133,6 +215,7 @@
       onUpdate();
     }}
     onCancel={onDelete}
+    cancelText="Delete"
   />
 {:else}
   <div
@@ -238,6 +321,17 @@
     class="px-4 py-5 sm:px-6 h-full flex flex-col justify-between items-center"
   >
     <h3 class="">Outputs</h3>
+    {#each process.commitments.filter(({ action }) => action?.inputOutput == "OUTPUT") as commitment (commitment.id)}
+      <CommitmentComponent
+        actions={outputActions}
+        bind:commitment
+        {agents}
+        {units}
+        {resourceSpecifications}
+        onDelete={() => handleDeleteCommitment(commitment.id)}
+        onUpdate={() => handleUpdateCommitment(commitment)}
+      />
+    {/each}
     <div class="py-5">
       {#if createOutput}
         <div
@@ -245,7 +339,7 @@
           class="grid grid-cols-1 gap-y-6 gap-x-4"
           on:click_outside={() => outputComponent.closeDropdown()}
         >
-          <Commitment
+          <CommitmentForm
             bind:this={outputComponent}
             bind:commitment={outputCommitment}
             actions={outputActions}
@@ -257,6 +351,7 @@
               createOutput = false;
             }}
             handleCancel={() => (createOutput = false)}
+            cancelText="Cancel"
           />
         </div>
       {:else}
