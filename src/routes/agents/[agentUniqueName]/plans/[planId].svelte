@@ -225,7 +225,10 @@
   async function handleUpdateProcess(process: Process) {
     loadingOverlay = true;
     let updateParams = {
-      ...process,
+      id: process.id,
+      title: process.title,
+      description: process.description,
+      dueDate: process.dueDate,
       labels: process.labels.map(({ id }) => id),
       agents: process.agents.map(({ id }) => id),
     };
