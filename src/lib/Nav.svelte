@@ -1,6 +1,5 @@
 <script lang="ts">
   export let path: string;
-
 </script>
 
 <!-- This example requires Tailwind CSS v2.0+ -->
@@ -106,7 +105,7 @@
   </div>
 </nav>
 
-<style>
+<style lang="postcss">
   .nav-default {
     @apply px-3 py-2 rounded-md text-sm font-medium;
   }
@@ -118,5 +117,4 @@
   .nav-inactive {
     @apply text-gray-300 hover:bg-gray-700 hover:text-white block;
   }
-
 </style>

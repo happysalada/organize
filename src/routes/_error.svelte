@@ -5,7 +5,7 @@
   const dev = process.env.NODE_ENV === 'development'
 </script>
 
-<style>
+<style lang="postcss">
   h1,
   p {
     @apply mx-auto my-0;

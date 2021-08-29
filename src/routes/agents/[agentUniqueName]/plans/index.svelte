@@ -56,6 +56,8 @@
   let title = "";
   let searchQuery = "";
   let loadingOverlay = false;
+  export let flashMessage;
+  export let flashType;
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>

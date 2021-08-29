@@ -10,7 +10,7 @@
   </p>
 </div>
 
-<style>
+<style lang="postcss">
   .loader {
     border-top-color: #3498db;
     -webkit-animation: spinner 1.5s linear infinite;

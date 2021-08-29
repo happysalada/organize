@@ -46,6 +46,8 @@
   import type { Agent } from "$lib/types";
 
   export let agents: Agent[];
+  export let flashMessage;
+  export let flashType;
   let filteredAgents: Agent[] = agents;
 
   let name = "";

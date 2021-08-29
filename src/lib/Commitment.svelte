@@ -11,13 +11,6 @@
   export let onDelete;
   export let onUpdate;
 
-  let inputActions = actions.filter(
-    ({ inputOutput }) => inputOutput == "INPUT"
-  );
-  let outputActions = actions.filter(
-    ({ inputOutput }) => inputOutput == "OUTPUT"
-  );
-
   let isEditing = false;
 
   let loadingOverlay = false;

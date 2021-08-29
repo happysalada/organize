@@ -26,7 +26,7 @@
   </footer>
 </div>
 
-<style>
+<style lang="postcss">
   /* minmax on the nav is used for expansion on mobile */
   /* minmax on the main is used for long main content */
   .grid {
