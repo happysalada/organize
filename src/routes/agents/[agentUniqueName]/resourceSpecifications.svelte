@@ -63,6 +63,8 @@
 
   export let resourceSpecifications: ResourceSpecification[] = [];
   export let agentUniqueName: string;
+  export let flashMessage;
+  export let flashType;
   let list = resourceSpecifications;
   let filtered: ResourceSpecification[] = list;
 

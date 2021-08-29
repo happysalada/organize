@@ -102,8 +102,9 @@
   import Loader from "$lib/Loader.svelte";
   import ProcessComponent from "$lib/Process.svelte";
   import ProcessForm from "$lib/ProcessForm.svelte";
-  import type { Process } from "$lib/types";
+  import type { Process, Commitment } from "$lib/types";
   import { createProcess, updateProcess, deleteProcess } from "$lib/api";
+  import { inputs, outputs } from "$lib/process";
 
   export let labels: Label[];
   export let agents: Agent[];
@@ -113,6 +114,7 @@
   export let plan: Plan;
   export let agentUniqueName: string;
   export let planId: string;
+  let svg;
 
   let mainAgent = agents.filter(
     ({ uniqueName }) => uniqueName == agentUniqueName
@@ -122,6 +124,86 @@
   let planTitle = plan.title;
   let planDescription = plan.description;
   let processes: Process[] = plan.processes || [];
+  // let width = 100;
+  // let height = 100;
+  // onMount(() => {
+  //   ({ width, height } = svg.getBoundingClientRect());
+  //   console.log("resize()", width, height);
+  // });
+  function commitmentToNode(
+    commitment: Commitment,
+    commitmentIndex: number,
+    processX: number,
+    processY: number,
+    processIndex: number
+  ): any {
+    let xOffset = commitment.action.inputOutput === "INPUT" ? 100 : 300;
+    const commitmentX = xOffset + processIndex * 300;
+    const commitmentY = 100 + commitmentIndex * 100;
+    const label = commitment.action.inputOutput === "INPUT" ? "I" : "O";
+    const links =
+      commitment.action.inputOutput === "INPUT"
+        ? [
+            {
+              source: { x: commitmentX, y: commitmentY },
+              target: { x: processX, y: processY },
+              label: "Input of",
+            },
+          ]
+        : [
+            {
+              source: { x: processX, y: processY },
+              target: { x: commitmentX, y: commitmentY },
+              label: "Output of",
+            },
+          ];
+    return {
+      id: commitment.id,
+      title: commitment.description,
+      x: commitmentX,
+      y: commitmentY,
+      label,
+      links,
+    };
+  }
+  $: maxHeight = processes.reduce((max, process) => {
+    return Math.max(max, inputs(process).length, outputs(process).length);
+  }, 1);
+  $: nodes = processes.reduce((all, process, processIndex) => {
+    const processX = 200 + processIndex * 300;
+    const processY = ((maxHeight + 1) * 100) / 2;
+    const inputNodes = inputs(process).map((commitment, commitmentIndex) =>
+      commitmentToNode(
+        commitment,
+        commitmentIndex,
+        processX,
+        processY,
+        processIndex
+      )
+    );
+    const outputNodes = outputs(process).map((commitment, commitmentIndex) =>
+      commitmentToNode(
+        commitment,
+        commitmentIndex,
+        processX,
+        processY,
+        processIndex
+      )
+    );
+    return [
+      ...all,
+      ...inputNodes,
+      ...outputNodes,
+      {
+        id: process.id,
+        title: process.title,
+        label: "P",
+        x: 200 + processIndex * 300,
+        y: ((maxHeight + 1) * 100) / 2,
+        links: [],
+      },
+    ];
+  }, []);
   // Process
   let creatingNewProcess = false;
   const initialNewProcess = {
@@ -317,6 +399,53 @@
             {#if loadingOverlay}
               <Loader />
             {/if}
+
+            <div class="sm:col-span-6">
+              <svg
+                bind:this={svg}
+                class="w-full"
+                xmlns="http://www.w3.org/2000/svg"
+                version="1.2"
+                baseProfile="tiny"
+                viewBox="0 0 {100 * processes.length * 4} {100 * maxHeight * 2}"
+              >
+                {#each nodes as { title, x, y, label, id, links } (id)}
+                  <g stroke="black" stroke-opacity="0.8" stroke-width="3">
+                    {#each links as { source, target, label }}
+                      <line
+                        x1={source.x}
+                        y1={source.y}
+                        x2={target.x}
+                        y2={target.y}
+                      >
+                        <title>{label}</title>
+                      </line>
+                    {/each}
+                  </g>
+                  <circle
+                    class="node"
+                    r="30"
+                    fill="white"
+                    stroke="black"
+                    stroke-width="4"
+                    cx={x}
+                    cy={y}
+                  >
+                    <title>{title}</title>
+                  </circle>
+                  <text
+                    {x}
+                    {y}
+                    stroke="black"
+                    stroke-witdh="3"
+                    text-anchor="middle"
+                    font-size="2em"
+                    dy="15"
+                    >{label}
+                  </text>
+                {/each}
+              </svg>
+            </div>
 
             {#each processes as process (process.id)}
               <ProcessComponent

@@ -39,7 +39,7 @@ dependencies:
 
 devDependencies:
   '@sveltejs/adapter-static': 1.0.0-next.17
-  '@sveltejs/kit': 1.0.0-next.158_svelte@3.42.4
+  '@sveltejs/kit': 1.0.0-next.159_svelte@3.42.4
   '@types/cookie': 0.4.1
   '@typescript-eslint/eslint-plugin': 4.29.3_5b13bab190e8051f191796d8c4619073
   '@typescript-eslint/parser': 4.29.3_eslint@7.32.0+typescript@4.4.2
@@ -181,8 +181,8 @@ packages:
     resolution: {integrity: sha512-RKYNkQxtsMgt0wD8PhfXR1hGT1Tmq1E5eZeTr1KxIerczITRnWVT8LElfu/9Kusv44yYlyQtNc1mLoYqgloOQw==}
     dev: true
 
-  /@sveltejs/kit/1.0.0-next.158_svelte@3.42.4:
-    resolution: {integrity: sha512-jVpVeAFOVNOGDRDVvbWjHxco5s78OYsrCJhnEAKoOe690gkWA5Qc8FqPXo8HHiaIHKHmTP1vbrEhQ5jkX7fBAw==}
+  /@sveltejs/kit/1.0.0-next.159_svelte@3.42.4:
+    resolution: {integrity: sha512-aSq2zgnPmTFgiVBMtlkv5X/wnVBJDAmM9coRzk+qAKZoSLmLEmDteJbFt4m6IcAS7YoNKx/smSfC8QkdGjjrdg==}
     engines: {node: ^12.20 || >=14.13}
     hasBin: true
     peerDependencies:

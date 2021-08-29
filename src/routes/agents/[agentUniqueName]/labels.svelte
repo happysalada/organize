@@ -52,6 +52,8 @@
 
   export let labels: Label[];
   export let agentUniqueName: string;
+  export let flashMessage;
+  export let flashType;
   let filteredLabels: Label[] = labels;
 
   let name = "";
