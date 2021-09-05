@@ -1,9 +1,5 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
-  import type { FlashType } from "$lib/types";
-
-  let flashMessage = undefined;
-  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
@@ -25,20 +21,20 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { plans: [], flashMessage, flashType, agentUniqueName },
+          props: { plans: [], flashMessage, agentUniqueName },
         };
       }
       const { plans } = data;
 
       return {
-        props: { plans, flashMessage, flashType, agentUniqueName },
+        props: { plans, agentUniqueName },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { flashMessage: message, flashType, agentUniqueName },
+      props: { flashMessage: message, agentUniqueName },
     };
   }
 </script>
@@ -46,7 +42,7 @@
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
-  import type { Plan } from "$lib/types";
+  import type { Plan, FlashType } from "$lib/types";
   import { createPlan } from "$lib/api";
 
   export let plans: Plan[];
@@ -56,8 +52,8 @@
   let title = "";
   let searchQuery = "";
   let loadingOverlay = false;
-  export let flashMessage;
-  export let flashType;
+  export let flashMessage = undefined;
+  export let flashType: FlashType = "ERROR";
 
   function search({ currentTarget: { value: searchValue } }) {
     filteredPlans = plans.filter((plan: Plan) =>

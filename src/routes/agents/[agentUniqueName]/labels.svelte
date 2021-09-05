@@ -1,8 +1,5 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
-  import type { FlashType } from "$lib/types";
-  let flashMessage = undefined;
-  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
@@ -24,20 +21,27 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { labels: [], agentUniqueName, flashMessage, flashType },
+          props: {
+            labels: [],
+            agentUniqueName,
+            flashMessage,
+          },
         };
       }
       const { labels } = data;
 
       return {
-        props: { labels, agentUniqueName, flashMessage, flashType },
+        props: {
+          labels,
+          agentUniqueName,
+        },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { agentUniqueName, flashMessage: message, flashType },
+      props: { agentUniqueName, flashMessage: message },
     };
   }
 </script>
@@ -46,14 +50,14 @@
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import { createLabel, deleteLabel } from "$lib/api";
-  import type { Label } from "$lib/types";
+  import type { Label, FlashType } from "$lib/types";
   import clickOutside from "$lib/clickOutside";
   import { colors } from "$lib/configuration";
 
   export let labels: Label[];
   export let agentUniqueName: string;
-  export let flashMessage;
-  export let flashType;
+  export let flashMessage = undefined;
+  export let flashType: FlashType = "ERROR";
   let filteredLabels: Label[] = labels;
 
   let name = "";

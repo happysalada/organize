@@ -1,5 +1,6 @@
 <script lang="ts">
   import DropdownFilterSingleInput from "./DropdownFilterSingleInput.svelte";
+  import "es6-object-assign/auto";
   import DatePicker from "@beyonk/svelte-datepicker/src/components/DatePicker.svelte";
   import type {
     Action,

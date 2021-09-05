@@ -1,8 +1,5 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
-  import type { FlashType } from "$lib/types";
-  let flashMessage = undefined;
-  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
@@ -28,7 +25,6 @@
             resourceSpecifications: [],
             agentUniqueName,
             flashMessage,
-            flashType,
           },
         };
       }
@@ -38,8 +34,6 @@
         props: {
           resourceSpecifications,
           agentUniqueName,
-          flashMessage,
-          flashType,
         },
       };
     }
@@ -47,7 +41,7 @@
     const { message } = await res.json();
 
     return {
-      props: { agentUniqueName, flashMessage: message, flashType },
+      props: { agentUniqueName, flashMessage: message },
     };
   }
 </script>
@@ -59,12 +53,12 @@
     createResourceSpecification,
     deleteResourceSpecification,
   } from "$lib/api";
-  import type { ResourceSpecification } from "$lib/types";
+  import type { ResourceSpecification, FlashType } from "$lib/types";
 
   export let resourceSpecifications: ResourceSpecification[] = [];
   export let agentUniqueName: string;
-  export let flashMessage;
-  export let flashType;
+  export let flashMessage = undefined;
+  export let flashType: FlashType = "ERROR";
   let list = resourceSpecifications;
   let filtered: ResourceSpecification[] = list;
 

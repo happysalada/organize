@@ -5,7 +5,6 @@
     Agent,
     Label,
     Plan,
-    FlashType,
     ResourceSpecification,
     Unit,
   } from "$lib/types";
@@ -14,8 +13,6 @@
   export async function load({ page, fetch }) {
     const agentUniqueName = page.params.agentUniqueName;
     const planId = page.params.planId;
-    let flashMessage: string | undefined;
-    let flashType = "ERROR";
     let labels: Label[] = [];
     let agents: Agent[] = [];
     let actions: Action[] = [];
@@ -67,33 +64,38 @@
     if (response.ok) {
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
-        flashMessage = errors
+        const flashMessage = errors
           .map(({ message }) => message.toString())
           .join("\n");
         console.error(flashMessage);
+        return {
+          props: { flashMessage },
+        };
       } else {
         ({ labels, agents, resourceSpecifications, plan, actions, units } =
           data);
+
+        return {
+          props: {
+            labels,
+            agents,
+            resourceSpecifications,
+            plan,
+            agentUniqueName,
+            planId,
+            actions,
+            units,
+          },
+        };
       }
     } else {
       const { message } = await response.json();
-      flashMessage = message;
+      return {
+        props: {
+          flashMessage: message,
+        },
+      };
     }
-
-    return {
-      props: {
-        labels,
-        agents,
-        resourceSpecifications,
-        plan,
-        flashMessage,
-        flashType,
-        agentUniqueName,
-        planId,
-        actions,
-        units,
-      },
-    };
   }
 </script>
 
@@ -102,18 +104,20 @@
   import Loader from "$lib/Loader.svelte";
   import ProcessComponent from "$lib/Process.svelte";
   import ProcessForm from "$lib/ProcessForm.svelte";
-  import type { Process, Commitment } from "$lib/types";
+  import type { Process, Commitment, FlashType } from "$lib/types";
   import { createProcess, updateProcess, deleteProcess } from "$lib/api";
   import { inputs, outputs } from "$lib/process";
 
-  export let labels: Label[];
-  export let agents: Agent[];
-  export let actions: Action[];
-  export let units: Unit[];
-  export let resourceSpecifications: ResourceSpecification[];
+  export let labels: Label[] = [];
+  export let agents: Agent[] = [];
+  export let actions: Action[] = [];
+  export let units: Unit[] = [];
+  export let resourceSpecifications: ResourceSpecification[] = [];
   export let plan: Plan;
   export let agentUniqueName: string;
   export let planId: string;
+  export let flashMessage = undefined;
+  export let flashType: FlashType = "ERROR";
   let svg;
 
   let mainAgent = agents.filter(
@@ -218,8 +222,6 @@
   let newProcess = Object.assign({}, initialNewProcess);
 
   let loadingOverlay = false;
-  export let flashMessage: string | undefined;
-  export let flashType: FlashType;
 
   async function handleUpdatePlan() {
     try {

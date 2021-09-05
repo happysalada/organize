@@ -1,8 +1,5 @@
 <script context="module" lang="ts">
   import { query } from "$lib/api";
-  import type { FlashType } from "$lib/types";
-  let flashMessage = undefined;
-  let flashType: FlashType = "ERROR";
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ fetch }) {
@@ -21,20 +18,20 @@
           .join("\n");
         console.error(flashMessage);
         return {
-          props: { agents: [], flashMessage, flashType },
+          props: { agents: [], flashMessage },
         };
       }
       const { agents } = data;
 
       return {
-        props: { agents, flashMessage, flashType },
+        props: { agents },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { flashMessage: message, flashType },
+      props: { flashMessage: message },
     };
   }
 </script>
@@ -43,11 +40,11 @@
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import { createAgent, deleteAgent } from "$lib/api";
-  import type { Agent } from "$lib/types";
+  import type { Agent, FlashType } from "$lib/types";
 
   export let agents: Agent[];
-  export let flashMessage;
-  export let flashType;
+  export let flashMessage = undefined;
+  export let flashType: FlashType = "ERROR";
   let filteredAgents: Agent[] = agents;
 
   let name = "";
