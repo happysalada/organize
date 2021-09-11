@@ -100,6 +100,10 @@
 </script>
 
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { zoom } from "d3-zoom";
+  import { select } from "d3-selection";
+
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
   import ProcessComponent from "$lib/Process.svelte";
@@ -118,7 +122,6 @@
   export let planId: string;
   export let flashMessage = undefined;
   export let flashType: FlashType = "ERROR";
-  let svg;
 
   let mainAgent = agents.filter(
     ({ uniqueName }) => uniqueName == agentUniqueName
@@ -128,12 +131,29 @@
   let planTitle = plan.title;
   let planDescription = plan.description;
   let processes: Process[] = plan.processes || [];
-  // let width = 100;
-  // let height = 100;
-  // onMount(() => {
-  //   ({ width, height } = svg.getBoundingClientRect());
-  //   console.log("resize()", width, height);
-  // });
+
+  // svg
+  let svg;
+  let width = 0;
+  let height = 0;
+  let g;
+  let x = 0;
+  let y = 0;
+  let k = 1;
+  let layoutUnit = 200;
+  let objectUnit = 100;
+
+  onMount(() => {
+    ({ width, height } = svg.getBoundingClientRect());
+    // TODO use for responsive
+    // console.log("resize()", width, height);
+    select(svg).call(
+      zoom().on("zoom", ({ transform }) => {
+        ({ k, x, y } = transform);
+      })
+    );
+  });
+
   function commitmentToNode(
     commitment: Commitment,
     commitmentIndex: number,
@@ -141,9 +161,9 @@
     processY: number,
     processIndex: number
   ): any {
-    let xOffset = commitment.action.inputOutput === "INPUT" ? 100 : 300;
-    const commitmentX = xOffset + processIndex * 300;
-    const commitmentY = 100 + commitmentIndex * 100;
+    let xOffset = commitment.action.inputOutput === "INPUT" ? 1 : 3;
+    const commitmentX = xOffset + processIndex * 3;
+    const commitmentY = 1 + commitmentIndex;
     const label = commitment.action.inputOutput === "INPUT" ? "I" : "O";
     const links =
       commitment.action.inputOutput === "INPUT"
@@ -174,8 +194,8 @@
     return Math.max(max, inputs(process).length, outputs(process).length);
   }, 1);
   $: nodes = processes.reduce((all, process, processIndex) => {
-    const processX = 200 + processIndex * 300;
-    const processY = ((maxHeight + 1) * 100) / 2;
+    const processX = 2 + processIndex * 3;
+    const processY = (maxHeight + 1) / 2;
     const inputNodes = inputs(process).map((commitment, commitmentIndex) =>
       commitmentToNode(
         commitment,
@@ -202,8 +222,8 @@
         id: process.id,
         title: process.title,
         label: "P",
-        x: 200 + processIndex * 300,
-        y: ((maxHeight + 1) * 100) / 2,
+        x: 2 + processIndex * 3,
+        y: (maxHeight + 1) / 2,
         links: [],
       },
     ];
@@ -409,43 +429,83 @@
                 xmlns="http://www.w3.org/2000/svg"
                 version="1.2"
                 baseProfile="tiny"
-                viewBox="0 0 {100 * processes.length * 4} {100 * maxHeight * 2}"
+                viewBox="0 0 {layoutUnit * processes.length * 4} {layoutUnit *
+                  maxHeight *
+                  2}"
               >
-                {#each nodes as { title, x, y, label, id, links } (id)}
-                  <g stroke="black" stroke-opacity="0.8" stroke-width="3">
-                    {#each links as { source, target, label }}
-                      <line
-                        x1={source.x}
-                        y1={source.y}
-                        x2={target.x}
-                        y2={target.y}
-                      >
-                        <title>{label}</title>
-                      </line>
-                    {/each}
-                  </g>
-                  <circle
-                    class="node"
-                    r="30"
-                    fill="white"
-                    stroke="black"
-                    stroke-width="4"
-                    cx={x}
-                    cy={y}
-                  >
-                    <title>{title}</title>
-                  </circle>
-                  <text
-                    {x}
-                    {y}
-                    stroke="black"
-                    stroke-witdh="3"
-                    text-anchor="middle"
-                    font-size="2em"
-                    dy="15"
-                    >{label}
-                  </text>
-                {/each}
+                <g
+                  bind:this={g}
+                  style="transform:translate({x}px, {y}px) scale({k})"
+                  stroke="black"
+                >
+                  {#each nodes as { title, x, y, label, id, links } (id)}
+                    <g stroke-opacity="0.8" stroke-width="3">
+                      {#each links as { source, target, label }}
+                        <line
+                          x1={source.x * layoutUnit}
+                          y1={source.y * layoutUnit}
+                          x2={target.x * layoutUnit}
+                          y2={target.y * layoutUnit}
+                        >
+                          <title>{label}</title>
+                        </line>
+                      {/each}
+                    </g>
+                    <rect
+                      x={x * layoutUnit}
+                      y={y * layoutUnit}
+                      width={objectUnit}
+                      height={objectUnit}
+                      fill="white"
+                      stroke-width="4"
+                      rx="15"
+                      transform="translate(-{objectUnit / 2}, -{objectUnit /
+                        2})"
+                    >
+                      <title>{title}</title>
+                    </rect>
+                    {#if label === "P"}
+                      <path
+                        class="cursor-pointer"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="white"
+                        d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        transform="translate({x * layoutUnit +
+                          objectUnit / 5}, {y * layoutUnit - objectUnit / 8})"
+                        on:click={() => {
+                          console.log("clicked");
+                        }}
+                      />
+                      <path
+                        class="cursor-pointer"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        stroke="currentColor"
+                        fill="none"
+                        d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
+                        transform="translate({x * layoutUnit -
+                          objectUnit / 2.3}, {y * layoutUnit - objectUnit / 8})"
+                        on:click={() => {
+                          console.log("clicked");
+                        }}
+                      />
+                    {/if}
+                    <text
+                      x={x * layoutUnit}
+                      y={y * layoutUnit}
+                      stroke-witdh="3"
+                      text-anchor="middle"
+                      font-size="1em"
+                      dy="15"
+                      transform="translate(0,-10)"
+                      >{label}
+                    </text>
+                  {/each}
+                </g>
               </svg>
             </div>
 
