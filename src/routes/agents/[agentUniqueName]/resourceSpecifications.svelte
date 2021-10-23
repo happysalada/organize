@@ -11,7 +11,7 @@
           id, name, uniqueName
         }
       }`
-    );
+    )
 
     if (res.ok) {
       const { data, errors } = await res.json();

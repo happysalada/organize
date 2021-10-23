@@ -2,14 +2,7 @@
   import "../global.css";
   import Nav from "$lib/Nav.svelte";
   import Footer from "../lib/Footer.svelte";
-  import { onMount } from "svelte";
-
-  let loaded = false;
-
   import { page } from "$app/stores";
-  onMount(async () => {
-    loaded = true;
-  });
 </script>
 
 <div class="grid">

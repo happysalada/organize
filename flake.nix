@@ -14,13 +14,9 @@
       {
         devShell = pkgs.mkShell {
           buildInputs = with pkgs; [
-            git
             nodejs-16_x
             nodePackages.prettier
             nodePackages.pnpm
-            # dev convenience
-            exa
-            fd
           ];
 
           shellHook = ''
