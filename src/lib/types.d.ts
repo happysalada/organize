@@ -16,6 +16,7 @@ export interface Agent {
   id: string;
   name: string;
   uniqueName: string;
+  agent_type: string;
   email: string;
 }
 

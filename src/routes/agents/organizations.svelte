@@ -6,7 +6,7 @@
     const res = await query(
       fetch,
       `{
-        agents {id, name, uniqueName, email }
+        organizations {id, name, uniqueName, email }
       }`
     );
 
@@ -21,10 +21,10 @@
           props: { agents: [], flashMessage },
         };
       }
-      const { agents } = data;
+      const { organizations } = data;
 
       return {
-        props: { agents },
+        props: { agents: organizations },
       };
     }
 
@@ -189,7 +189,7 @@
                         <span class="sr-only">Labels</span>
                       </th>
                       <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Resource specifications</span>
+                        <span class="sr-only">Resource type</span>
                       </th>
                       <th scope="col" class="relative px-6 py-3">
                         <span class="sr-only">Delete</span>
@@ -233,7 +233,7 @@
                           <a
                             href="agents/{agent.uniqueName}/resourceSpecifications"
                             class="text-indigo-600 hover:text-indigo-900"
-                            >Resource specifications</a
+                            >Resource type</a
                           >
                         </td>
                         <td

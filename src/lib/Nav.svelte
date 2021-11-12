@@ -80,11 +80,18 @@
           <div class="flex space-x-4">
             <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
             <a
-              href="/agents"
-              class="{path === '/agents'
+              href="/agents/individuals"
+              class="{path === '/agents/individuals'
                 ? 'nav-active'
                 : 'nav-inactive'} nav-default"
-              aria-current="page">Agents</a
+              aria-current="page">Individuals</a
+            >
+            <a
+              href="/agents/organizations"
+              class="{path === '/agents/organizations'
+                ? 'nav-active'
+                : 'nav-inactive'} nav-default"
+              aria-current="page">Organizations</a
             >
           </div>
         </div>
@@ -97,9 +104,14 @@
     <div class="px-2 pt-2 pb-3 space-y-1">
       <!-- Current: "bg-gray-900 text-white", Default: "text-gray-300 hover:bg-gray-700 hover:text-white" -->
       <a
-        href="/agents"
+        href="/agents/individuals"
         class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
-        aria-current="page">Agents</a
+        aria-current="page">Individuals</a
+      >
+      <a
+        href="/agents/organizations"
+        class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
+        aria-current="page">Organizations</a
       >
     </div>
   </div>
