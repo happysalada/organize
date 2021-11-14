@@ -18,7 +18,7 @@
   export let process: Process;
   export let flashMessage;
   export let flashType;
-  export let agentUniqueName;
+  export let agentId;
   export let onDelete;
   export let onUpdate;
 
@@ -209,7 +209,6 @@
     {labels}
     {agents}
     bind:process
-    {agentUniqueName}
     onSubmit={() => {
       isEditing = false;
       onUpdate();

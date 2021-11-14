@@ -2,16 +2,13 @@
   import { query } from "$lib/api";
 
   // see https://kit.svelte.dev/docs#loading
-  export async function load({ page, fetch }) {
-    const agentUniqueName = page.params.agentUniqueName;
+  export async function load({ fetch }) {
     const res = await query(
       fetch,
       `{
-        labels(agentUniqueName: "${agentUniqueName}") {
-          id, name, color, uniqueName
-        }
+        resourceSpecifications { id, name, uniqueName }
       }`
-    );
+    )
 
     if (res.ok) {
       const { data, errors } = await res.json();
@@ -22,26 +19,22 @@
         console.error(flashMessage);
         return {
           props: {
-            labels: [],
-            agentUniqueName,
+            resourceSpecifications: [],
             flashMessage,
           },
         };
       }
-      const { labels } = data;
+      const { resourceSpecifications } = data;
 
       return {
-        props: {
-          labels,
-          agentUniqueName,
-        },
+        props: { resourceSpecifications },
       };
     }
 
     const { message } = await res.json();
 
     return {
-      props: { agentUniqueName, flashMessage: message },
+      props: { flashMessage: message },
     };
   }
 </script>
@@ -49,31 +42,30 @@
 <script lang="ts">
   import Flash from "$lib/Flash.svelte";
   import Loader from "$lib/Loader.svelte";
-  import { createLabel, deleteLabel } from "$lib/api";
-  import type { Label, FlashType } from "$lib/types";
-  import clickOutside from "$lib/clickOutside";
-  import { colors } from "$lib/configuration";
+  import {
+    createResourceSpecification,
+    deleteResourceSpecification,
+  } from "$lib/api";
+  import type { ResourceSpecification, FlashType } from "$lib/types";
 
-  export let labels: Label[];
-  export let agentUniqueName: string;
+  export let resourceSpecifications: ResourceSpecification[] = [];
   export let flashMessage = undefined;
   export let flashType: FlashType = "ERROR";
-  let filteredLabels: Label[] = labels;
+  let list = resourceSpecifications;
+  let filtered: ResourceSpecification[] = list;
 
   let name = "";
-  let color = "";
   let searchQuery = "";
-  let dropdownOpen = false;
   let loadingOverlay = false;
 
   function search({ currentTarget: { value: searchValue } }) {
-    filteredLabels = labels.filter((label: Label) =>
-      Object.values(label).some((labelValue: String | undefined) => {
+    filtered = list.filter((el: ResourceSpecification) =>
+      Object.values(el).some((value: String | undefined) => {
         let stringToSearch: String;
-        if (!labelValue) {
+        if (!value) {
           return false;
         } else {
-          stringToSearch = labelValue.toLocaleLowerCase();
+          stringToSearch = value.toLocaleLowerCase();
         }
         return stringToSearch.includes(searchValue);
       })
@@ -84,7 +76,7 @@
     if (name === "") return;
     loadingOverlay = true;
     try {
-      const response = await createLabel({ name, color, agentUniqueName });
+      const response = await createResourceSpecification({ name });
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         flashMessage = errors
@@ -95,9 +87,9 @@
         return;
       }
 
-      const { createLabel: created } = data;
-      labels = [created, ...labels];
-      filteredLabels = labels;
+      const { createResourceSpecification: created } = data;
+      list = [created, ...list];
+      filtered = list;
       name = "";
     } catch (error) {
       flashMessage = error.toString();
@@ -105,10 +97,10 @@
     loadingOverlay = false;
   }
 
-  async function handleDelete(uniqueName: String) {
+  async function handleDelete(id: String) {
     loadingOverlay = true;
     try {
-      const response = await deleteLabel(uniqueName);
+      const response = await deleteResourceSpecification(id);
       const { data, errors } = await response.json();
       if (errors && errors.length > 0) {
         flashMessage = errors
@@ -123,8 +115,8 @@
         return;
       }
 
-      labels = labels.filter((label) => label.uniqueName != uniqueName);
-      filteredLabels = labels;
+      list = list.filter((el) => el.id != id);
+      filtered = list;
     } catch (error) {
       flashMessage = error.toString();
       flashType = "ERROR";
@@ -160,57 +152,13 @@
     <div class="bg-white shadow sm:rounded-md">
       <ul class="divide-y divide-gray-200">
         <div class="flex h-full space-x-0.5">
-          <div
-            class="w-1/3 flex items-center justify-center bg-{color ||
-              'gray'}-500 relative cursor-pointer"
-            use:clickOutside
-            on:click_outside={() => (dropdownOpen = false)}
-            on:click|preventDefault={() => (dropdownOpen = !dropdownOpen)}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              class="h-10 w-10"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
-              />
-            </svg>
-            {#if dropdownOpen}
-              <ul
-                class="absolute w-full -bottom-16 h-full overflow-visible z-10 mt-1  bg-white shadow-lg rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                tabindex="-1"
-                role="listbox"
-                aria-labelledby="listbox-label"
-                aria-activedescendant="listbox-option-3"
-              >
-                {#each colors as availableColor}
-                  <li
-                    class="bg-{availableColor}-500 cursor-pointer select-none relative py-2 pl-3 pr-9 h-12"
-                    id="listbox-option-0"
-                    role="option"
-                    on:click={() => {
-                      color = availableColor;
-                    }}
-                  />
-                {/each}
-
-                <!-- More items... -->
-              </ul>
-            {/if}
-          </div>
           <form class="mb-1 w-2/3" on:submit|preventDefault={handleSubmit}>
             <input
               class="p-4 text-lg focus:outline-none w-full border-b-4 border-indigo-500 border-opacity-0 focus:border-opacity-100"
               name="name"
               bind:value={name}
-              aria-label="Create Label"
-              placeholder="+ tap to create a new label"
+              aria-label="Create a Resource type"
+              placeholder="+ tap to create a new resource type"
             />
           </form>
         </div>
@@ -248,22 +196,21 @@
                     </tr>
                   </thead>
                   <tbody>
-                    {#each filteredLabels as label, index (label.uniqueName)}
+                    {#each filtered as element, index (element.id)}
                       <tr class={index % 2 == 0 ? "bg-white" : "bg-gray-50"}>
                         <td
                           class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"
                         >
-                          {label.name}
+                          {element.name}
                         </td>
                         <td
-                          class="px-6 py-4 whitespace-nowrap text-sm bg-{label.color ||
-                            'gray'}-500"
+                          class="px-6 py-4 whitespace-nowrap text-sm bg-gray'-500"
                         />
                         <td
                           class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                         >
                           <button
-                            on:click={() => handleDelete(label.uniqueName)}
+                            on:click={() => handleDelete(element.id)}
                             type="button"
                             class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs font-medium rounded text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           >

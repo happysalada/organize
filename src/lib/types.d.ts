@@ -2,6 +2,7 @@
  * Can be made globally available by placing this
  * inside `global.d.ts` and removing `export` keyword
  */
+
 export interface Locals {
   userid: string;
 }
@@ -20,6 +21,18 @@ export interface Agent {
   email: string;
 }
 
+export interface NewAgent {
+  name: string;
+  agentType: AgentType;
+}
+
+export interface AgentRelation {
+  id: string;
+  subject: Agent,
+  object: Agent,
+  agentRelationType: string;
+}
+
 export interface Label {
   id: string;
   name: string;
@@ -31,7 +44,6 @@ export interface Label {
 export interface NewLabel {
   name: string;
   color: string;
-  agentUniqueName: string;
 }
 
 export interface Process {
@@ -65,7 +77,7 @@ export interface Plan {
 
 export interface NewPlan {
   title: string;
-  agentUniqueName: string;
+  agentId: string;
 }
 
 export interface UpdatePlan {
@@ -130,7 +142,6 @@ export interface ResourceSpecification {
 
 export interface NewResourceSpecification {
   name: string;
-  agentUniqueName: string;
 }
 
 export interface UpdateCommitment {

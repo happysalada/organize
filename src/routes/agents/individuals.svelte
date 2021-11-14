@@ -41,6 +41,7 @@
   import Loader from "$lib/Loader.svelte";
   import { createAgent, deleteAgent } from "$lib/api";
   import type { Agent, FlashType } from "$lib/types";
+  import { AgentType } from "../../globals.d";
 
   export let agents: Agent[];
   export let flashMessage = undefined;
@@ -68,7 +69,7 @@
   async function handleSubmit() {
     loadingOverlay = true;
     try {
-      const promise = createAgent(name);
+      const promise = createAgent({name, agentType: AgentType.Individual});
       name = "";
       const response = await promise;
       const { data, errors } = await response.json();
@@ -186,12 +187,6 @@
                         <span class="sr-only">Plans</span>
                       </th>
                       <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Labels</span>
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
-                        <span class="sr-only">Resource type</span>
-                      </th>
-                      <th scope="col" class="relative px-6 py-3">
                         <span class="sr-only">Delete</span>
                       </th>
                     </tr>
@@ -213,7 +208,7 @@
                           class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                         >
                           <a
-                            href="agents/{agent.uniqueName}/plans"
+                            href="/agents/{agent.id}/plans"
                             class="text-indigo-600 hover:text-indigo-900"
                             >Plans</a
                           >
@@ -222,18 +217,9 @@
                           class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
                         >
                           <a
-                            href="agents/{agent.uniqueName}/labels"
+                            href="/agents/{agent.id}/agentRelations"
                             class="text-indigo-600 hover:text-indigo-900"
-                            >Labels</a
-                          >
-                        </td>
-                        <td
-                          class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium"
-                        >
-                          <a
-                            href="agents/{agent.uniqueName}/resourceSpecifications"
-                            class="text-indigo-600 hover:text-indigo-900"
-                            >Resource type</a
+                            >Relations</a
                           >
                         </td>
                         <td

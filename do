@@ -9,8 +9,19 @@ proc build() {
   pnpm build
 }
 
-proc deploy() {
-  wrangler publish
+proc prepare(name) {
+  for file in ./build/**/**/*.js; do
+    replace_env_vars $name $file
+  done
+}
+
+proc replace_env_vars(name, file) {
+  sd 'apiUrl:".*"' "apiUrl:\"https://$name.valueflows.union.rocks\"" $file
+}
+
+proc deploy(name) {
+  prepare $name
+  wrangler publish --env $name
 }
 
 proc update_deps() {

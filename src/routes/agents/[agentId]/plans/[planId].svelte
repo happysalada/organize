@@ -11,7 +11,7 @@
 
   // see https://kit.svelte.dev/docs#loading
   export async function load({ page, fetch }) {
-    const agentUniqueName = page.params.agentUniqueName;
+    const agentId = page.params.agentId;
     const planId = page.params.planId;
     let labels: Label[] = [];
     let agents: Agent[] = [];
@@ -22,37 +22,21 @@
     const response = await query(
       fetch,
       `{
-        labels(agentUniqueName: "${agentUniqueName}") {
-          id, name, color, uniqueName
-        }
-        resourceSpecifications(agentUniqueName: "${agentUniqueName}") {
-          id, name, uniqueName
-        }
+        labels { id, name, color, uniqueName }
+        resourceSpecifications { id, name, uniqueName }
         agents {id, name, uniqueName, email }
         plan(planId: "${planId}") {
           id, title, description, processes {
             id, title, description,
-            labels {
-              id, name, color
-            }
-            agents {
-              id, name, uniqueName
-            }
+            labels { id, name, color }
+            agents { id, name, uniqueName }
             commitments {
               id, description, quantity, actionId,
               resourceSpecificationId, unitId, assignedAgentId
-              action {
-                id, name, inputOutput
-              }
-              resourceSpecification {
-                id, name
-              }
-              unit {
-                id, label
-              }
-              assignedAgent {
-                id, name
-              }
+              action { id, name, inputOutput }
+              resourceSpecification { id, name }
+              unit { id, label }
+              assignedAgent { id, name }
             }
           }
         } 
@@ -81,7 +65,7 @@
             agents,
             resourceSpecifications,
             plan,
-            agentUniqueName,
+            agentId,
             planId,
             actions,
             units,
@@ -118,14 +102,12 @@
   export let units: Unit[] = [];
   export let resourceSpecifications: ResourceSpecification[] = [];
   export let plan: Plan;
-  export let agentUniqueName: string;
+  export let agentId: string;
   export let planId: string;
   export let flashMessage = undefined;
   export let flashType: FlashType = "ERROR";
 
-  let mainAgent = agents.filter(
-    ({ uniqueName }) => uniqueName == agentUniqueName
-  )[0];
+  let mainAgent = agents.filter( ({ id }) => id == agentId )[0];
 
   // Plan
   let planTitle = plan.title;
@@ -517,7 +499,7 @@
                 {labels}
                 {resourceSpecifications}
                 bind:process
-                {agentUniqueName}
+                {agentId}
                 {flashMessage}
                 {flashType}
                 onDelete={() => handleDeleteProcess(process.id)}
@@ -529,7 +511,7 @@
               <ProcessForm
                 {agents}
                 {labels}
-                {agentUniqueName}
+                {agentId}
                 bind:process={newProcess}
                 onSubmit={handleCreateProcess}
                 onCancel={() => (creatingNewProcess = false)}

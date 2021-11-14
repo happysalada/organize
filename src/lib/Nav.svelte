@@ -93,6 +93,20 @@
                 : 'nav-inactive'} nav-default"
               aria-current="page">Organizations</a
             >
+            <a
+              href="/labels"
+              class="{path === '/labels'
+                ? 'nav-active'
+                : 'nav-inactive'} nav-default"
+              aria-current="page">Labels</a
+            >
+            <a
+              href="/resourceSpecifications"
+              class="{path === '/resourceSpecificatinos'
+                ? 'nav-active'
+                : 'nav-inactive'} nav-default"
+              aria-current="page">Resource type</a
+            >
           </div>
         </div>
       </div>
@@ -112,6 +126,11 @@
         href="/agents/organizations"
         class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
         aria-current="page">Organizations</a
+      >
+      <a
+        href="/agents/relations"
+        class="bg-gray-900 text-white block px-3 py-2 rounded-md text-base font-medium"
+        aria-current="page">Relations</a
       >
     </div>
   </div>
