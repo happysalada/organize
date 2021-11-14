@@ -18,7 +18,6 @@
   export let process: Process;
   export let flashMessage;
   export let flashType;
-  export let agentId;
   export let onDelete;
   export let onUpdate;
 
