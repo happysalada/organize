@@ -9,18 +9,13 @@ proc build() {
   pnpm build
 }
 
-proc prepare(name) {
-  for file in ./build/**/**/*.js; do
-    replace_env_vars $name $file
-  done
-}
-
-proc replace_env_vars(name, file) {
-  sd 'apiUrl:".*"' "apiUrl:\"https://$name.valueflows.union.rocks\"" $file
+proc replace_env_vars(name) {
+  sd 'VITE_API_URL=".*"' "VITE_API_URL=\"https://$name-vf.union.rocks\"" .env.production
 }
 
 proc deploy(name) {
-  prepare $name
+  replace_env_vars $name
+  build
   wrangler publish --env $name
 }
 

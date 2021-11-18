@@ -65,7 +65,7 @@ export async function deleteAgent(uniqueName: String) {
   });
 }
 
-export async function createPlan({ title, agentUniqueName }: NewPlan) {
+export async function createPlan({ title, agentId }: NewPlan) {
   return await fetch(`${base}/graphql`, {
     method: "POST",
     headers: {
@@ -78,7 +78,7 @@ export async function createPlan({ title, agentUniqueName }: NewPlan) {
       variables: {
         newPlan: {
           title,
-          agentUniqueName,
+          agentId,
         },
       },
     }),
